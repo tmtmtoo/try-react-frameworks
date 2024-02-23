@@ -1,5 +1,5 @@
 {
-  description = "QA Tools";
+  description = "try-remix";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -11,14 +11,12 @@
       let
         pkgs = import nixpkgs { inherit system; };
       in {
-        buildInputs = [
-          pkgs.nodejs
-          pkgs.just
-          pkgs.chromium
-          pkgs.fontconfig
-        ];
-
-        FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
+        devShell = pkgs.mkShell {
+          buildInputs = [
+            pkgs.nodejs
+            pkgs.just
+          ];
+        };
       }
     );
 }
