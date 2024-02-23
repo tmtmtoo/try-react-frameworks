@@ -1,5 +1,7 @@
 {
-    "image": "ghcr.io/xtruder/nix-devcontainer:latest",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
     "forwardPorts": [],
     "customizations": {
       "vscode": {
