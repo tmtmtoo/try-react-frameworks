@@ -2,10 +2,10 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "dev",
   "workspaceFolder": "/workspace",
-    "forwardPorts": [],
-    "customizations": {
-      "vscode": {
-        "extensions": ["jnoortheen.nix-ide"]
-      }
+  "forwardPorts": [],
+  "customizations": {
+    "vscode": {
+      "extensions": ["jnoortheen.nix-ide"]
     }
+  }
 }
