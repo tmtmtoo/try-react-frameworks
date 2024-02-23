@@ -1,0 +1,9 @@
+{
+    "image": "ghcr.io/xtruder/nix-devcontainer:latest",
+    "forwardPorts": [],
+    "customizations": {
+      "vscode": {
+        "extensions": ["jnoortheen.nix-ide"]
+      }
+    }
+}
