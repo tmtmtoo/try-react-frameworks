@@ -16,7 +16,7 @@
           pkgs.just
           pkgs.chromium
           pkgs.fontconfig
-        ]
+        ];
 
         FONTCONFIG_FILE = "${pkgs.fontconfig.out}/etc/fonts/fonts.conf";
       }
