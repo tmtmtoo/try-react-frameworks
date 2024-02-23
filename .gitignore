@@ -221,3 +221,5 @@ result
 result-*
 .direnv
 /direnv
+
+.pnpm-store
