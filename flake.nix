@@ -16,6 +16,7 @@
             pkgs.nodejs
             pkgs.nodePackages.pnpm
             pkgs.just
+            pkgs.docker
           ];
         };
       }
