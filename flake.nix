@@ -17,6 +17,9 @@
             pkgs.nodePackages.pnpm
             pkgs.just
             pkgs.docker-client
+            pkgs.sqldef
+            pkgs.sqlc
+            pkgs.postgresql
           ];
         };
       }
