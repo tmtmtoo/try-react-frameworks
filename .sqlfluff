@@ -1,0 +1,8 @@
+[sqlfluff]
+
+dialect = postgres
+max_line_length = 100
+
+[sqlfluff:rules:layout.long_lines]
+ignore_comment_lines = True
+ignore_comment_clauses = True

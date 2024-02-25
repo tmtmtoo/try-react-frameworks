@@ -9,8 +9,14 @@ compose-up:
 compose-down:
   @docker compose down
 
-psql:
+db-psql:
   @psql "$DATABASE_URL"
 
 db-migrate:
   @psqldef -U "$DATABASE_USER" -h localhost -p 5432 dev < schema.sql
+
+sql-fix target=".":
+  @sqlfluff fix {{target}}
+
+sql-lint target=".":
+  @sqlfluff fix {{target}}

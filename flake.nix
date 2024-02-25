@@ -20,6 +20,7 @@
             pkgs.sqldef
             pkgs.sqlc
             pkgs.postgresql
+            pkgs.sqlfluff
           ];
         };
       }
