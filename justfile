@@ -16,8 +16,11 @@ db-migrate:
   @psqldef -U "$DATABASE_USER" -h localhost -p 5432 dev < schema.sql
   @psql "$DATABASE_URL" -f ./seed.sql
 
+db-codegen:
+  @sqlc generate
+
 sql-fix target=".":
   @sqlfluff fix {{target}}
 
 sql-lint target=".":
-  @sqlfluff fix {{target}}
+  @sqlfluff lint {{target}}
