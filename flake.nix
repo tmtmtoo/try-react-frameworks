@@ -21,6 +21,7 @@
             pkgs.sqlc
             pkgs.postgresql
             pkgs.sqlfluff
+            pkgs.biome
           ];
         };
       }
