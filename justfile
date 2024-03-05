@@ -24,3 +24,12 @@ sql-fix target=".":
 
 sql-lint target=".":
   @sqlfluff lint {{target}}
+
+ts-format target=".":
+  @biome format --write {{target}}
+
+ts-lint target=".":
+  @biome lint {{target}}
+
+ts-fix target=".":
+  @biome check --apply {{target}}
