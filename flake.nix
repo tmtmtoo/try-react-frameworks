@@ -24,6 +24,7 @@
             pkgs.biome
           ];
         };
+        formater = pkgs.nixpkgs-fmt;
       }
     );
 }
