@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { Client } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -25,14 +26,27 @@ describe("otameshi", () => {
     });
 
     await pgClient.connect();
+
+    const schema = await readFile("../../schema.sql", { encoding: "utf-8" });
+    const seed = await readFile("../../seed.sql", { encoding: "utf-8" });
+
+    await pgClient.query(schema);
+    await pgClient.query(seed);
   }, 10000000);
 
-  it("aaa", () => {
-    expect(0).toBe(0)
-  })
+  it("example", async () => {
+    const user = await getUser(pgClient, {
+      id: "802086b3-4127-4c91-ab6b-235a61c5a009",
+    });
+    expect(user).toBeNull();
+  });
 
   afterAll(async () => {
-    await pgClient.end();
-    await pgContainer.stop();
+    if (pgClient) {
+      await pgClient.end();
+    }
+    if (pgContainer) {
+      await pgContainer.stop();
+    }
   });
 });

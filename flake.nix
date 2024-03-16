@@ -10,7 +10,8 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-      in {
+      in
+      {
         devShell = pkgs.mkShell {
           buildInputs = [
             pkgs.nodejs
@@ -24,7 +25,7 @@
             pkgs.biome
           ];
         };
-        formater = pkgs.nixpkgs-fmt;
+        formatter = pkgs.nixpkgs-fmt;
       }
     );
 }

@@ -9,9 +9,11 @@ select
     user_id as id,
     email,
     name,
-    max(created_at) as created_at
+    created_at
 from user_profile
-where id = $1`;
+where id = $1
+order by created_at desc
+limit 1`;
 
 export interface GetUserArgs {
   id: string;
@@ -21,7 +23,7 @@ export interface GetUserRow {
   id: string;
   email: string;
   name: string | null;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export async function getUser(
