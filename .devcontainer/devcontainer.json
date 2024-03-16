@@ -1,7 +1,7 @@
 {
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "dev",
-  "workspaceFolder": "/workspace",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "forwardPorts": [],
   "customizations": {
     "vscode": {
