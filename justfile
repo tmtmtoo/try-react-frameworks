@@ -31,3 +31,9 @@ ts-lint target=".":
 ts-fix target=".":
   -@biome format --write {{target}}
   @biome check --apply {{target}}
+
+nix-fmt target=".":
+  @nix fmt {{target}}
+
+unit-test:
+  @cd ./packages/example-app && pnpm test

@@ -8,31 +8,34 @@ describe("otameshi", () => {
   let pgContainer: StartedTestContainer;
   let pgClient: Client;
 
-  beforeAll(async () => {
-    pgContainer = await new GenericContainer("postgres:latest")
-      .withExposedPorts(5432)
-      .withEnvironment({
-        POSTGRES_USER: "dev",
-        POSTGRES_HOST_AUTH_METHOD: "trust",
-      })
-      .withWaitStrategy(Wait.forListeningPorts())
-      .start();
+  beforeAll(
+    async () => {
+      pgContainer = await new GenericContainer("postgres:latest")
+        .withExposedPorts(5432)
+        .withEnvironment({
+          POSTGRES_USER: "dev",
+          POSTGRES_HOST_AUTH_METHOD: "trust",
+        })
+        .withWaitStrategy(Wait.forListeningPorts())
+        .start();
 
-    pgClient = new Client({
-      host: pgContainer.getHost(),
-      port: pgContainer.getMappedPort(5432),
-      database: "dev",
-      user: "dev",
-    });
+      pgClient = new Client({
+        host: pgContainer.getHost(),
+        port: pgContainer.getMappedPort(5432),
+        database: "dev",
+        user: "dev",
+      });
 
-    await pgClient.connect();
+      await pgClient.connect();
 
-    const schema = await readFile("../../schema.sql", { encoding: "utf-8" });
-    const seed = await readFile("../../seed.sql", { encoding: "utf-8" });
+      const schema = await readFile("../../schema.sql", { encoding: "utf-8" });
+      const seed = await readFile("../../seed.sql", { encoding: "utf-8" });
 
-    await pgClient.query(schema);
-    await pgClient.query(seed);
-  }, 10000000);
+      await pgClient.query(schema);
+      await pgClient.query(seed);
+    },
+    1000 * 60 * 5,
+  );
 
   it("example", async () => {
     const user = await getUser(pgClient, {
