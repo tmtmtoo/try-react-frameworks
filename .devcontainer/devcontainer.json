@@ -9,7 +9,14 @@
   "forwardPorts": [],
   "customizations": {
     "vscode": {
-      "extensions": ["jnoortheen.nix-ide"]
+      "extensions": [
+        "bbenoist.nix",
+        "vscodevim.vim",
+        "biomejs.biome",
+        "vitest.explorer",
+        "skellock.just",
+        "dorzey.vscode-sqlfluff"
+      ]
     }
   }
 }
