@@ -35,5 +35,8 @@ ts-fix target=".":
 nix-fmt target=".":
   @nix fmt {{target}}
 
-unit-test:
+app-prepare:
+  @pnpm install --frozen-lockfile
+
+app-unit-test: app-prepare
   @cd ./packages/example-app && pnpm test
