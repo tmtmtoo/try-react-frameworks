@@ -1,4 +1,3 @@
-/*
 import { Client } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -26,11 +25,14 @@ describe("otameshi", () => {
     });
 
     await pgClient.connect();
-  });
+  }, 10000000);
+
+  it("aaa", () => {
+    expect(0).toBe(0)
+  })
 
   afterAll(async () => {
     await pgClient.end();
     await pgContainer.stop();
   });
 });
-*/

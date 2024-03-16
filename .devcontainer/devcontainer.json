@@ -1,9 +1,11 @@
 {
-  "build": {
-    "dockerfile": "Dockerfile"
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "features": {
+    "docker-in-docker": "latest"
   },
-  "runArgs": ["--init", "--privileged"],
-  "overrideCommand": false,
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": false,
+  "postCreateCommand": "bash .devcontainer/post_create.sh",
   "forwardPorts": [],
   "customizations": {
     "vscode": {
