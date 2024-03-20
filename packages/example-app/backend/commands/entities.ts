@@ -27,14 +27,14 @@ export const createUserWithDefaultOrganization = (
   _userId?: UserId,
   _organizationId?: OrganizationId,
 ): User => ({
-  id: _userId ? _userId : userId(uuidv7())._unsafeUnwrap(),
+  id: _userId ? _userId : (userId(uuidv7()).value as UserId),
   email,
   organizations: [
     {
       id: _organizationId
         ? _organizationId
-        : organizationId(uuidv7())._unsafeUnwrap(),
-      displayName: displayName("My First Organization")._unsafeUnwrap(),
+        : (organizationId(uuidv7()).value as OrganizationId),
+      displayName: displayName("My First Organization").value as DisplayName,
       role: "admin",
     },
   ],

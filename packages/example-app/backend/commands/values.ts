@@ -1,4 +1,4 @@
-import { Result, err, ok } from "neverthrow";
+import { Result } from "backend/types";
 import * as v from "valibot";
 
 type Typed<Value, Tag> = Value & { tag: Tag };
@@ -8,13 +8,14 @@ const factoryUsingValibot =
   (value: V): Result<Typed<V, T>, Error> => {
     try {
       const parsed = v.parse(schema, value);
-      return ok(parsed as Typed<V, T>);
+      return { value: parsed as Typed<V, T> };
     } catch (e) {
       const error = new Error(`failed to parse value: ${value}`, { cause: e });
-      return err(error);
+      return { error };
     }
   };
 
+// biome-ignore lint: <any>
 type ReturnFactoryType<T extends (...args: any) => any> =
   ReturnType<T> extends Result<infer O, infer E> ? O : never;
 

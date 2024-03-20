@@ -74,7 +74,7 @@ describe("otameshi", () => {
     `,
       rowMode: "array",
     });
-    if (result.rows.length == 1) {
+    if (result.rows.length === 1) {
       const [id, userId, email, name] = result.rows[0];
       expect({ id, userId, email, name }).toStrictEqual({
         id: "b4aa08e8-9d6e-4cda-b1b7-621496f60608",

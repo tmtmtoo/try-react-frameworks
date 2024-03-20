@@ -14,6 +14,6 @@
     "enabled": true,
     "ignore": ["packages/example-app/public", "packages/example-app/build"],
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 4 
   }
 }
