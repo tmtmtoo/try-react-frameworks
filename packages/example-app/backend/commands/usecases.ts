@@ -1,5 +1,6 @@
 import { Component, Result } from "backend/types";
 import { User, createUserWithDefaultOrganization } from "./entities";
+import { RepositoryError, UnknownError } from "./errors";
 import { DisplayName, Email, displayName, email } from "./values";
 
 export type LoginOrSignupCommand = {
@@ -20,7 +21,7 @@ export const loginOrSignupCommand = (
     if (parsedEmail.error || parsedDisplayName?.error) {
         return {
             error: new Error(
-            `Invalid LoginOrSignup Command: email: ${emailValue}, displayName: ${displayNameValue}`,
+                `Invalid LoginOrSignup Command: email: ${emailValue}, displayName: ${displayNameValue}`,
             ),
         };
     }
@@ -33,6 +34,8 @@ export const loginOrSignupCommand = (
     };
 };
 
+export type LoginOrSignupResult = Result<User, RepositoryError | UnknownError>;
+
 export const createLoginOrSignupUseCase =
     <Context>(
         findUser: Component<Email, Context, Result<User | null, Error>>,
@@ -41,7 +44,7 @@ export const createLoginOrSignupUseCase =
     async (
         command: LoginOrSignupCommand,
         ctx: Context,
-    ): Promise<Result<User, Error>> => {
+    ): Promise<LoginOrSignupResult> => {
         const findResult = await findUser(command.email, ctx);
 
         if (findResult.value) {
@@ -61,7 +64,7 @@ export const createLoginOrSignupUseCase =
             }
 
             return {
-                error: new Error("failed to create user", {
+                error: new RepositoryError("failed to persist user", {
                     cause: persistResult.error,
                 }),
             };
@@ -69,14 +72,14 @@ export const createLoginOrSignupUseCase =
 
         if (findResult.error instanceof Error) {
             return {
-                error: new Error("failed to find user", {
+                error: new RepositoryError("failed to find user", {
                     cause: findResult.error,
                 }),
             };
         }
 
         return {
-            error: new Error("Unknown error has occured", {
+            error: new UnknownError("Unknown error has occured", {
                 cause: findResult.error,
             }),
         };
