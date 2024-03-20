@@ -1,22 +1,22 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/base:debian",
-  "features": {
-    "docker-in-docker": "latest"
-  },
-  "remoteUser": "vscode",
-  "updateRemoteUserUID": false,
-  "postCreateCommand": "bash .devcontainer/post_create.sh",
-  "forwardPorts": [],
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "bbenoist.nix",
-        "vscodevim.vim",
-        "biomejs.biome",
-        "vitest.explorer",
-        "skellock.just",
-        "dorzey.vscode-sqlfluff"
-      ]
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": {
+        "docker-in-docker": "latest"
+    },
+    "remoteUser": "vscode",
+    "updateRemoteUserUID": false,
+    "postCreateCommand": "bash .devcontainer/post_create.sh",
+    "forwardPorts": [],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bbenoist.nix",
+                "vscodevim.vim",
+                "biomejs.biome",
+                "vitest.explorer",
+                "skellock.just",
+                "dorzey.vscode-sqlfluff"
+            ]
+        }
     }
-  }
 }
