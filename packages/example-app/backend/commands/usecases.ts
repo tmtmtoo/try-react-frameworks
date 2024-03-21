@@ -1,7 +1,23 @@
 import { Component, Result } from "backend/types";
 import { User, createUserWithDefaultOrganization } from "./entities";
-import { RepositoryError, UnknownError } from "./errors";
 import { DisplayName, Email, displayName, email } from "./values";
+import { FindUser, PersistUser } from "./repositories";
+
+export class RepositoryError extends Error {
+    // biome-ignore lint: <any>
+    constructor(...args: any) {
+        super(args);
+        this.name = this.constructor.name;
+    }
+}
+
+export class UnknownError extends Error {
+    // biome-ignore lint: <any>
+    constructor(...args: any) {
+        super(args);
+        this.name = this.constructor.name;
+    }
+}
 
 export type LoginOrSignupCommand = {
     email: Email;
@@ -38,8 +54,8 @@ export type LoginOrSignupResult = Result<User, RepositoryError | UnknownError>;
 
 export const createLoginOrSignupUseCase =
     <Context>(
-        findUser: Component<Email, Context, Result<User | null, Error>>,
-        persistUser: Component<User, Context, Result<User, Error>>,
+        findUser: FindUser<Context>,
+        persistUser: PersistUser<Context>
     ) =>
     async (
         command: LoginOrSignupCommand,
