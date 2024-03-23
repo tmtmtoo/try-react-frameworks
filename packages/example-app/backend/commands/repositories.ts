@@ -1,16 +1,8 @@
 import { Component, Result } from "../types";
-import { Email } from "./values";
 import { User } from "./entities";
+import { Email } from "./values";
 
 export class IoError extends Error {
-    // biome-ignore lint: <any>
-    constructor(...args: any) {
-        super(args);
-        this.name = this.constructor.name;
-    }
-}
-
-export class ResponseConversionError extends Error {
     // biome-ignore lint: <any>
     constructor(...args: any) {
         super(args);
@@ -29,17 +21,11 @@ export class DataConsistencyError extends Error {
 export type FindUser<Context> = Component<
     Email,
     Context,
-    Result<
-        User | undefined,
-        IoError | ResponseConversionError | DataConsistencyError
-    >
+    Result<User | null, IoError | DataConsistencyError | Error>
 >;
 
 export type PersistUser<Context> = Component<
     User,
     Context,
-    Result<
-        User,
-        IoError | ResponseConversionError | DataConsistencyError
-    >
+    Result<User, IoError | DataConsistencyError | Error>
 >;

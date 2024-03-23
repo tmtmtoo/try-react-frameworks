@@ -5,9 +5,9 @@ import {
     OrganizationId,
     Role,
     UserId,
-    displayName,
-    organizationId,
-    userId,
+    parseDisplayName,
+    parseOrganizationId,
+    parseUserId,
 } from "./values";
 
 export type User = {
@@ -27,14 +27,14 @@ export const createUserWithDefaultOrganization = (
     _userId?: UserId,
     _organizationId?: OrganizationId,
 ): User => ({
-    id: _userId ? _userId : (userId(uuidv7()).value as UserId),
+    id: _userId ? _userId : (parseUserId(uuidv7()).value as UserId),
     email,
     organizations: [
         {
             id: _organizationId
                 ? _organizationId
-                : (organizationId(uuidv7()).value as OrganizationId),
-            displayName: displayName("My First Organization")
+                : (parseOrganizationId(uuidv7()).value as OrganizationId),
+            displayName: parseDisplayName("My First Organization")
                 .value as DisplayName,
             role: "admin",
         },

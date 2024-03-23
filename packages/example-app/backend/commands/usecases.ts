@@ -1,7 +1,7 @@
-import { Component, Result } from "backend/types";
+import { Result } from "../types";
 import { User, createUserWithDefaultOrganization } from "./entities";
-import { DisplayName, Email, displayName, email } from "./values";
 import { FindUser, PersistUser } from "./repositories";
+import { DisplayName, Email, parseDisplayName, parseEmail } from "./values";
 
 export class RepositoryError extends Error {
     // biome-ignore lint: <any>
@@ -24,14 +24,14 @@ export type LoginOrSignupCommand = {
     displayName?: DisplayName;
 };
 
-export const loginOrSignupCommand = (
+export const parseLoginOrSignupCommand = (
     emailValue: string,
     displayNameValue?: string,
 ): Result<LoginOrSignupCommand, Error> => {
-    const parsedEmail = email(emailValue);
+    const parsedEmail = parseEmail(emailValue);
 
     const parsedDisplayName = displayNameValue
-        ? displayName(displayNameValue)
+        ? parseDisplayName(displayNameValue)
         : undefined;
 
     if (parsedEmail.error || parsedDisplayName?.error) {
@@ -52,11 +52,8 @@ export const loginOrSignupCommand = (
 
 export type LoginOrSignupResult = Result<User, RepositoryError | UnknownError>;
 
-export const createLoginOrSignupUseCase =
-    <Context>(
-        findUser: FindUser<Context>,
-        persistUser: PersistUser<Context>
-    ) =>
+export const factoryLoginOrSignupUseCase =
+    <Context>(findUser: FindUser<Context>, persistUser: PersistUser<Context>) =>
     async (
         command: LoginOrSignupCommand,
         ctx: Context,

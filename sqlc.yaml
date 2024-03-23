@@ -6,10 +6,11 @@ plugins:
       sha256: 287df8f6cc06377d67ad5ba02c9e0f00c585509881434d15ea8bd9fc751a9368
 sql:
   - engine: postgresql
-    queries: packages/example-app/backend/db/queries.sql
+    queries:
+      - packages/example-app/backend/commands/infrastructures/queries.sql
     schema: schema.sql
     codegen:
-      - out: packages/example-app/backend/db/gen
+      - out: packages/example-app/backend/gen
         plugin: ts
         options:
           runtime: node

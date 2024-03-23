@@ -21,28 +21,38 @@ const factoryUsingValibot =
 type ReturnFactoryType<T extends (...args: any) => any> =
     ReturnType<T> extends Result<infer O, infer E> ? O : never;
 
-export const email = factoryUsingValibot<string, "email">(
+export const parseEmail = factoryUsingValibot<string, "email">(
     v.string([v.email()]),
 );
 
-export type Email = ReturnFactoryType<typeof email>;
+export type Email = ReturnFactoryType<typeof parseEmail>;
 
-export const displayName = factoryUsingValibot<string, "displayName">(
+export const parseDisplayName = factoryUsingValibot<string, "displayName">(
     v.string([v.minLength(1)]),
 );
 
-export type DisplayName = ReturnFactoryType<typeof displayName>;
+export type DisplayName = ReturnFactoryType<typeof parseDisplayName>;
 
-export const userId = factoryUsingValibot<string, "userId">(
+export const parseUserId = factoryUsingValibot<string, "userId">(
     v.string([v.uuid()]),
 );
 
-export type UserId = ReturnFactoryType<typeof userId>;
+export type UserId = ReturnFactoryType<typeof parseUserId>;
 
-export const organizationId = factoryUsingValibot<string, "organizationId">(
-    v.string([v.uuid()]),
-);
+export const parseOrganizationId = factoryUsingValibot<
+    string,
+    "organizationId"
+>(v.string([v.uuid()]));
 
-export type OrganizationId = ReturnFactoryType<typeof organizationId>;
+export type OrganizationId = ReturnFactoryType<typeof parseOrganizationId>;
 
 export type Role = "admin" | "member" | "guest" | string;
+
+export const parseRole = factoryUsingValibot<Role, "role">(
+    v.union([
+        v.literal("admin"),
+        v.literal("member"),
+        v.literal("guest"),
+        v.string(),
+    ]),
+);
