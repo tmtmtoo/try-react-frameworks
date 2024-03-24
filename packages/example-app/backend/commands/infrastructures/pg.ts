@@ -1,7 +1,7 @@
 import { Pool, PoolClient } from "pg";
 import {
     selectBelongingOrganizationByUserId,
-    selectLatestUserProfileFromEmail,
+    selectLatestUserProfileByEmail,
 } from "../../gen/queries_sql";
 import { DataConsistencyError, FindUser, IoError } from "../repositories";
 import {
@@ -36,7 +36,7 @@ export const factoryFindUser =
     async (email) => {
         try {
             const value = await tx(pool, async (conn) => {
-                const user = await selectLatestUserProfileFromEmail(conn, {
+                const user = await selectLatestUserProfileByEmail(conn, {
                     email,
                 });
 
