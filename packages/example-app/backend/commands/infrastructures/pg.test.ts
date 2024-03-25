@@ -4,6 +4,7 @@ import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { factoryFindUser } from "./pg";
 import { Email, parseEmail } from "../values";
+import { IoError } from "../repositories";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;
@@ -83,6 +84,20 @@ describe("when postgresql given fixtures", () => {
         const result = await findUser(email, undefined);
         expect(result.error).toBeUndefined();
         expect(result.value).toBeNull();
+    })
+
+    it("findUser returns Error with bad connection pool", async () => {
+        const badPool = new Pool({
+            host: pgContainer.getHost(),
+            port: pgContainer.getMappedPort(5432),
+            database: "boooooo",
+            user: "dev",
+        });
+        const email = parseEmail("example@example.com").value as Email;
+        const findUser = factoryFindUser(badPool);
+        const result = await findUser(email, undefined);
+        await badPool.end()
+        expect(result.error).toBeInstanceOf(IoError)
     })
 
     afterAll(async () => {
