@@ -37,3 +37,21 @@ where
         select organization_id from organization_delete
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc;
+
+-- name: InsertUser :exec
+insert into users (id) values ($1);
+
+-- name: InsertUserProfile :exec
+insert into user_profile (id, user_id, email, name) values ($1, $2, $3, $4);
+
+-- name: InsertOrgaization :exec
+insert into organizations (id) values ($1);
+
+-- name: InsertOrganizationProfile :exec
+insert into organization_profile (id, organization_id, name) values ($1, $2, $3);
+
+-- name: InsertBelong :exec
+insert into belong (id, user_id, organization_id) values ($1, $2, $3);
+
+-- name: InsertAssign :exec
+insert into assign (id, role_name, belong_id) values ($1, $2, $3);

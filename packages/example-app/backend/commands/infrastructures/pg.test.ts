@@ -2,8 +2,19 @@ import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { factoryFindUser } from "./pg";
-import { Email, parseEmail } from "../values";
+import { factoryFindUser, factoryPersitUser } from "./pg";
+import {
+    DisplayName,
+    Email,
+    OrganizationId,
+    Role,
+    UserId,
+    parseDisplayName,
+    parseEmail,
+    parseOrganizationId,
+    parseRole,
+    parseUserId,
+} from "../values";
 import { IoError } from "../repositories";
 
 describe("when postgresql given fixtures", () => {
@@ -78,13 +89,13 @@ describe("when postgresql given fixtures", () => {
         });
     });
 
-    it("findUser returns null by unknown user email", async ()=> {
+    it("findUser returns null by unknown user email", async () => {
         const email = parseEmail("unkown@example.com").value as Email;
         const findUser = factoryFindUser(pgPool);
         const result = await findUser(email, undefined);
         expect(result.error).toBeUndefined();
         expect(result.value).toBeNull();
-    })
+    });
 
     it("findUser returns Error with bad connection pool", async () => {
         const badPool = new Pool({
@@ -96,9 +107,38 @@ describe("when postgresql given fixtures", () => {
         const email = parseEmail("example@example.com").value as Email;
         const findUser = factoryFindUser(badPool);
         const result = await findUser(email, undefined);
-        await badPool.end()
-        expect(result.error).toBeInstanceOf(IoError)
-    })
+        await badPool.end();
+        expect(result.error).toBeInstanceOf(IoError);
+    });
+
+    it("persitUser return User", async () => {
+        const user = {
+            id: parseUserId("018e75eb-6cf7-7730-a5a3-6ff60f027d74")
+                .value as UserId,
+            displayName: parseDisplayName("Foobar").value as DisplayName,
+            email: parseEmail("fooooooo@example.com").value as Email,
+            organizations: [
+                {
+                    id: parseOrganizationId(
+                        "018e75ed-dfe8-7a5b-927c-bda45bb3393f",
+                    ).value as OrganizationId,
+                    displayName: parseDisplayName("SuperHyper")
+                        .value as DisplayName,
+                    role: parseRole("admin").value as Role,
+                },
+                {
+                    id: parseOrganizationId(
+                        "018e75ef-c299-7784-9928-758b670526d0",
+                    ).value as OrganizationId,
+                    displayName: parseDisplayName("OkOk").value as DisplayName,
+                    role: parseRole("member").value as Role,
+                },
+            ],
+        };
+        const persitUser = factoryPersitUser(pgPool);
+        const result = await persitUser(user, undefined);
+        console.log(JSON.stringify(result));
+    });
 
     afterAll(async () => {
         if (pgPool) {

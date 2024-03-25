@@ -45,20 +45,20 @@ export async function selectLatestUserProfileByEmail(client: Client, args: Selec
 }
 
 export const selectBelongingOrganizationByUserIdQuery = `-- name: SelectBelongingOrganizationByUserId :many
-with latest_organization_profile as (
+with latest_organization_profiles as (
     select distinct on (created_at) id, organization_id, name, created_at from organization_profile
     order by created_at desc
 )
 
 select distinct on (assign.belong_id)
-    latest_organization_profile.organization_id as organization_id,
-    latest_organization_profile.name as organization_name,
+    latest_organization_profiles.organization_id as organization_id,
+    latest_organization_profiles.name as organization_name,
     roles.name as role_name,
     roles.example as authority_example
 from belong
 inner join
-    latest_organization_profile
-    on belong.organization_id = latest_organization_profile.organization_id
+    latest_organization_profiles
+    on belong.organization_id = latest_organization_profiles.organization_id
 inner join assign on belong.id = assign.belong_id
 inner join roles on assign.role_name = roles.name
 where
@@ -66,7 +66,7 @@ where
     and belong.id not in (
         select belong_id from dismiss
     )
-    and latest_organization_profile.organization_id not in (
+    and latest_organization_profiles.organization_id not in (
         select organization_id from organization_delete
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc`;
@@ -95,6 +95,105 @@ export async function selectBelongingOrganizationByUserId(client: Client, args: 
             roleName: row[2],
             authorityExample: row[3]
         };
+    });
+}
+
+export const insertUserQuery = `-- name: InsertUser :exec
+insert into users (id) values ($1)`;
+
+export interface InsertUserArgs {
+    id: string;
+}
+
+export async function insertUser(client: Client, args: InsertUserArgs): Promise<void> {
+    await client.query({
+        text: insertUserQuery,
+        values: [args.id],
+        rowMode: "array"
+    });
+}
+
+export const insertUserProfileQuery = `-- name: InsertUserProfile :exec
+insert into user_profile (id, user_id, email, name) values ($1, $2, $3, $4)`;
+
+export interface InsertUserProfileArgs {
+    id: string;
+    userId: string;
+    email: string;
+    name: string | null;
+}
+
+export async function insertUserProfile(client: Client, args: InsertUserProfileArgs): Promise<void> {
+    await client.query({
+        text: insertUserProfileQuery,
+        values: [args.id, args.userId, args.email, args.name],
+        rowMode: "array"
+    });
+}
+
+export const insertOrgaizationQuery = `-- name: InsertOrgaization :exec
+insert into organizations (id) values ($1)`;
+
+export interface InsertOrgaizationArgs {
+    id: string;
+}
+
+export async function insertOrgaization(client: Client, args: InsertOrgaizationArgs): Promise<void> {
+    await client.query({
+        text: insertOrgaizationQuery,
+        values: [args.id],
+        rowMode: "array"
+    });
+}
+
+export const insertOrganizationProfileQuery = `-- name: InsertOrganizationProfile :exec
+insert into organization_profile (id, organization_id, name) values ($1, $2, $3)`;
+
+export interface InsertOrganizationProfileArgs {
+    id: string;
+    organizationId: string;
+    name: string;
+}
+
+export async function insertOrganizationProfile(client: Client, args: InsertOrganizationProfileArgs): Promise<void> {
+    await client.query({
+        text: insertOrganizationProfileQuery,
+        values: [args.id, args.organizationId, args.name],
+        rowMode: "array"
+    });
+}
+
+export const insertBelongQuery = `-- name: InsertBelong :exec
+insert into belong (id, user_id, organization_id) values ($1, $2, $3)`;
+
+export interface InsertBelongArgs {
+    id: string;
+    userId: string;
+    organizationId: string;
+}
+
+export async function insertBelong(client: Client, args: InsertBelongArgs): Promise<void> {
+    await client.query({
+        text: insertBelongQuery,
+        values: [args.id, args.userId, args.organizationId],
+        rowMode: "array"
+    });
+}
+
+export const insertAssignQuery = `-- name: InsertAssign :exec
+insert into assign (id, role_name, belong_id) values ($1, $2, $3)`;
+
+export interface InsertAssignArgs {
+    id: string;
+    roleName: string;
+    belongId: string;
+}
+
+export async function insertAssign(client: Client, args: InsertAssignArgs): Promise<void> {
+    await client.query({
+        text: insertAssignQuery,
+        values: [args.id, args.roleName, args.belongId],
+        rowMode: "array"
     });
 }
 

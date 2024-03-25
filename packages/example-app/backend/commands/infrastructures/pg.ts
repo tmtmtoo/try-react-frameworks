@@ -1,9 +1,20 @@
 import { Pool, PoolClient } from "pg";
 import {
+    insertAssign,
+    insertBelong,
+    insertOrgaization,
+    insertOrganizationProfile,
+    insertUser,
+    insertUserProfile,
     selectBelongingOrganizationByUserId,
     selectLatestUserProfileByEmail,
 } from "../../gen/queries_sql";
-import { DataConsistencyError, FindUser, IoError } from "../repositories";
+import {
+    DataConsistencyError,
+    FindUser,
+    IoError,
+    PersistUser,
+} from "../repositories";
 import {
     parseDisplayName,
     parseEmail,
@@ -11,6 +22,8 @@ import {
     parseRole,
     parseUserId,
 } from "../values";
+import { User } from "../entities";
+import { uuidv7 } from "uuidv7";
 
 const tx = async <T>(
     pool: Pool,
@@ -31,82 +44,165 @@ const tx = async <T>(
     }
 };
 
+const intoUserMayException = (from: {
+    id: string;
+    name: string | null;
+    email: string;
+    organizations: {
+        id: string;
+        name: string;
+        role: string;
+        authorityExample: boolean;
+    }[];
+}): User => {
+    const userId = parseUserId(from.id);
+    const userName = from.name ? parseDisplayName(from.name) : undefined;
+    const userEmail = parseEmail(from.email);
+
+    if (userId.error || userEmail.error || userName?.error) {
+        throw new DataConsistencyError(
+            `invalid user profile: user_id: ${from.id}, user_name: ${from.name}, user_email: ${from.email}`,
+        );
+    }
+
+    const organizations = [];
+
+    for (const organization of from.organizations) {
+        const organizationId = parseOrganizationId(organization.id);
+        const organizationName = parseDisplayName(organization.name);
+        const role = parseRole(organization.role);
+        const authorityExample = organization.authorityExample;
+
+        if (organizationId.error || organizationName.error || role.error) {
+            throw new DataConsistencyError(
+                `invalid belongings: organization_id: ${organization.id}, organization_name: ${organization.name}, role: ${organization.role}, authority_example: ${organization.authorityExample}`,
+            );
+        }
+
+        organizations.push({
+            id: organizationId.value,
+            displayName: organizationName.value,
+            role: role.value,
+            authorityExample,
+        });
+    }
+
+    return {
+        id: userId.value,
+        displayName: userName?.value,
+        email: userEmail.value,
+        organizations,
+    };
+};
+
 export const factoryFindUser =
     <Context>(pool: Pool): FindUser<Context> =>
     async (email) => {
+        let conn;
+
+        try {
+            conn = await pool.connect();
+
+            const user = await selectLatestUserProfileByEmail(conn, { email });
+
+            if (user === null) {
+                return { value: null };
+            }
+
+            const organizations = await selectBelongingOrganizationByUserId(
+                conn,
+                { userId: user.userId },
+            );
+
+            const value = intoUserMayException({
+                id: user.userId,
+                name: user.name,
+                email: user.email,
+                organizations: organizations.map((org) => ({
+                    id: org.organizationId,
+                    name: org.organizationName,
+                    role: org.roleName,
+                    authorityExample: org.authorityExample,
+                })),
+            });
+
+            return { value };
+        } catch (e) {
+            if (e instanceof DataConsistencyError) {
+                return { error: e };
+            }
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        } finally {
+            conn?.release();
+        }
+    };
+
+export const factoryPersitUser =
+    <Context>(pool: Pool): PersistUser<Context> =>
+    async (user: User) => {
+        console.log(user)
         try {
             const value = await tx(pool, async (conn) => {
-                const user = await selectLatestUserProfileByEmail(conn, {
-                    email,
+                await insertUser(conn, { id: user.id });
+                await insertUserProfile(conn, {
+                    id: uuidv7(),
+                    userId: user.id,
+                    name: user.displayName ? user.displayName : null,
+                    email: user.email,
                 });
 
-                if (user === null) {
-                    return null;
-                }
-
-                const userId = parseUserId(user.userId);
-
-                const userName = user.name
-                    ? parseDisplayName(user.name)
-                    : undefined;
-
-                const userEmail = parseEmail(user.email);
-
-                if (userId.error || userEmail.error || userName?.error) {
-                    throw new DataConsistencyError(
-                        `invalid user profile: user_id: ${user.userId}, user_name: ${user.name}, user_email: ${user.email}`,
-                    );
-                }
-
-                const belong = await selectBelongingOrganizationByUserId(conn, {
-                    userId: userId.value,
-                });
-
-                const organizations = [];
-
-                for (const organization of belong) {
-                    const organizationId = parseOrganizationId(
-                        organization.organizationId,
-                    );
-
-                    const organizationName = parseDisplayName(
-                        organization.organizationName,
-                    );
-
-                    const role = parseRole(organization.roleName);
-
-                    const authorityExample = organization.authorityExample;
-
-                    if (
-                        organizationId.error ||
-                        organizationName.error ||
-                        role.error
-                    ) {
-                        throw new DataConsistencyError(
-                            `invalid belongings: organization_id: ${organization.organizationId}, organization_name: ${organization.organizationName}, role: ${organization.roleName}, authority_example: ${organization.authorityExample}`,
-                        );
-                    }
-
-                    organizations.push({
-                        id: organizationId.value,
-                        displayName: organizationName.value,
-                        role: role.value,
-                        authorityExample,
+                for (const organization of user.organizations) {
+                    await insertOrgaization(conn, { id: organization.id });
+                    await insertOrganizationProfile(conn, {
+                        id: uuidv7(),
+                        organizationId: organization.id,
+                        name: organization.displayName,
+                    });
+                    const belongId = uuidv7();
+                    await insertBelong(conn, {
+                        id: belongId,
+                        userId: user.id,
+                        organizationId: organization.id,
+                    });
+                    await insertAssign(conn, {
+                        id: uuidv7(),
+                        roleName: organization.role,
+                        belongId,
                     });
                 }
 
-                if (organizations.length === 0) {
+                const selectedUser = await selectLatestUserProfileByEmail(
+                    conn,
+                    { email: user.email },
+                );
+
+                if (selectedUser === null) {
                     throw new DataConsistencyError(
-                        `no belongings for ${user.email}`,
+                        `failed to select inserted user: ${user.email}`,
                     );
                 }
 
-                return {
-                    id: userId.value,
-                    displayName: userName?.value,
-                    email: userEmail.value,
-                    organizations,
-                };
+                const organizations = await selectBelongingOrganizationByUserId(
+                    conn,
+                    { userId: selectedUser.userId },
+                );
+                console.log(organizations)
+
+                return intoUserMayException({
+                    id: selectedUser.userId,
+                    name: selectedUser.name ? selectedUser.name : null,
+                    email: selectedUser.email,
+                    organizations: organizations.map((org) => ({
+                        id: org.organizationId,
+                        name: org.organizationName,
+                        role: org.roleName,
+                        authorityExample: org.authorityExample,
+                    })),
+                });
             });
             return { value };
         } catch (e) {
