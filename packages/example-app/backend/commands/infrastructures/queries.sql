@@ -12,9 +12,20 @@ order by user_profile.created_at desc
 limit 1;
 
 -- name: SelectBelongingOrganizationByUserId :many
-with latest_organization_profiles as (
-    select distinct on (created_at) * from organization_profile
-    order by created_at desc
+with latest as (
+    select
+        organization_id,
+        max(created_at) as created_at
+    from organization_profile
+    group by organization_id
+),
+
+latest_organization_profiles as (
+    select organization_profile.* from organization_profile
+    inner join latest
+        on
+            organization_profile.organization_id = latest.organization_id
+            and organization_profile.created_at = latest.created_at
 )
 
 select distinct on (assign.belong_id)

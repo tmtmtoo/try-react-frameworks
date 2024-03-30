@@ -137,7 +137,27 @@ describe("when postgresql given fixtures", () => {
         };
         const persitUser = factoryPersitUser(pgPool);
         const result = await persitUser(user, undefined);
-        console.log(JSON.stringify(result));
+        expect(result.value).toStrictEqual({
+            value: {
+                id: "018e75eb-6cf7-7730-a5a3-6ff60f027d74",
+                displayName: "Foobar",
+                email: "fooooooo@example.com",
+                organizations: [
+                    {
+                        id: "018e75ed-dfe8-7a5b-927c-bda45bb3393f",
+                        displayName: "SuperHyper",
+                        role: "admin",
+                        authorityExample: true,
+                    },
+                    {
+                        id: "018e75ef-c299-7784-9928-758b670526d0",
+                        displayName: "OkOk",
+                        role: "member",
+                        authorityExample: false,
+                    },
+                ],
+            },
+        });
     });
 
     afterAll(async () => {
