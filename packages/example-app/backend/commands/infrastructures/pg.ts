@@ -144,7 +144,6 @@ export const factoryFindUser =
 export const factoryPersitUser =
     <Context>(pool: Pool): PersistUser<Context> =>
     async (user: User) => {
-        console.log(user)
         try {
             const value = await tx(pool, async (conn) => {
                 await insertUser(conn, { id: user.id });
@@ -190,7 +189,6 @@ export const factoryPersitUser =
                     conn,
                     { userId: selectedUser.userId },
                 );
-                console.log(organizations)
 
                 return intoUserMayException({
                     id: selectedUser.userId,
