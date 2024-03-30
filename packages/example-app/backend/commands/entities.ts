@@ -24,15 +24,15 @@ export type User = {
 
 export const createUserWithDefaultOrganization = (
     email: Email,
-    _userId?: UserId,
-    _organizationId?: OrganizationId,
+    userId?: UserId,
+    organizationId?: OrganizationId,
 ): User => ({
-    id: _userId ? _userId : (parseUserId(uuidv7()).value as UserId),
+    id: userId ? userId : (parseUserId(uuidv7()).value as UserId),
     email,
     organizations: [
         {
-            id: _organizationId
-                ? _organizationId
+            id: organizationId
+                ? organizationId
                 : (parseOrganizationId(uuidv7()).value as OrganizationId),
             displayName: parseDisplayName("My First Organization")
                 .value as DisplayName,

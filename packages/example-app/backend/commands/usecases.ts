@@ -1,4 +1,4 @@
-import { Result } from "../types";
+import { Component, Result } from "../types";
 import { User, createUserWithDefaultOrganization } from "./entities";
 import { FindUser, PersistUser } from "./repositories";
 import { DisplayName, Email, parseDisplayName, parseEmail } from "./values";
@@ -25,19 +25,18 @@ export type LoginOrSignupCommand = {
 };
 
 export const parseLoginOrSignupCommand = (
-    emailValue: string,
-    displayNameValue?: string,
+    email: string,
+    displayName?: string,
 ): Result<LoginOrSignupCommand, Error> => {
-    const parsedEmail = parseEmail(emailValue);
+    const parsedEmail = parseEmail(email);
 
-    const parsedDisplayName = displayNameValue
-        ? parseDisplayName(displayNameValue)
-        : undefined;
+    const parsedDisplayName =
+        displayName !== undefined ? parseDisplayName(displayName) : undefined;
 
     if (parsedEmail.error || parsedDisplayName?.error) {
         return {
             error: new Error(
-                `Invalid LoginOrSignup Command: email: ${emailValue}, displayName: ${displayNameValue}`,
+                `Invalid LoginOrSignup Command: email: ${email}, displayName: ${displayName}`,
             ),
         };
     }
@@ -52,17 +51,19 @@ export const parseLoginOrSignupCommand = (
 
 export type LoginOrSignupResult = Result<User, RepositoryError | UnknownError>;
 
-export const factoryLoginOrSignupUseCase =
-    <Context>(findUser: FindUser<Context>, persistUser: PersistUser<Context>) =>
-    async (
-        command: LoginOrSignupCommand,
-        ctx: Context,
-    ): Promise<LoginOrSignupResult> => {
-        const findResult = await findUser(command.email, ctx);
+export type LoginOrSignupUseCase<Context> = Component<
+    LoginOrSignupCommand,
+    Context,
+    LoginOrSignupResult
+>;
 
-        if (findResult.value) {
-            return { value: findResult.value };
-        }
+export const factoryLoginOrSignupUseCase =
+    <Context>(
+        findUser: FindUser<Context>,
+        persistUser: PersistUser<Context>,
+    ): LoginOrSignupUseCase<Context> =>
+    async (command: LoginOrSignupCommand, ctx: Context) => {
+        const findResult = await findUser(command.email, ctx);
 
         if (findResult.value === null) {
             const userWithDefaultOrganization =
@@ -75,14 +76,23 @@ export const factoryLoginOrSignupUseCase =
             if (persistResult.value) {
                 return { value: persistResult.value };
             }
-
+            if (persistResult.error instanceof Error) {
+                return {
+                    error: new RepositoryError("failed to persist user", {
+                        cause: persistResult.error,
+                    }),
+                };
+            }
             return {
-                error: new RepositoryError("failed to persist user", {
+                error: new UnknownError("Unknown error has occured", {
                     cause: persistResult.error,
                 }),
             };
         }
 
+        if (findResult.value) {
+            return { value: findResult.value };
+        }
         if (findResult.error instanceof Error) {
             return {
                 error: new RepositoryError("failed to find user", {
@@ -90,7 +100,6 @@ export const factoryLoginOrSignupUseCase =
                 }),
             };
         }
-
         return {
             error: new UnknownError("Unknown error has occured", {
                 cause: findResult.error,

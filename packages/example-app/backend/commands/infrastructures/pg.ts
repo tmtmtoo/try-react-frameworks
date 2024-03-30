@@ -1,4 +1,5 @@
 import { Pool, PoolClient } from "pg";
+import { uuidv7 } from "uuidv7";
 import {
     insertAssign,
     insertBelong,
@@ -9,6 +10,7 @@ import {
     selectBelongingOrganizationByUserId,
     selectLatestUserProfileByEmail,
 } from "../../gen/queries_sql";
+import { User } from "../entities";
 import {
     DataConsistencyError,
     FindUser,
@@ -22,8 +24,6 @@ import {
     parseRole,
     parseUserId,
 } from "../values";
-import { User } from "../entities";
-import { uuidv7 } from "uuidv7";
 
 const tx = async <T>(
     pool: Pool,

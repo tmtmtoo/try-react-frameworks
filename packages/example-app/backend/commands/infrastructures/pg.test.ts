@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { factoryFindUser, factoryPersitUser } from "./pg";
+import { IoError } from "../repositories";
 import {
     DisplayName,
     Email,
@@ -15,7 +15,7 @@ import {
     parseRole,
     parseUserId,
 } from "../values";
-import { IoError } from "../repositories";
+import { factoryFindUser, factoryPersitUser } from "./pg";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;
