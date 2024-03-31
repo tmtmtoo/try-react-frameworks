@@ -32,6 +32,9 @@ ts-fix target=".":
   -@biome format --write {{target}}
   @biome check --apply {{target}}
 
+ts-check:
+  @cd ./packages/example-app && pnpm typecheck
+
 nix-fmt target=".":
   @nix fmt {{target}}
 
