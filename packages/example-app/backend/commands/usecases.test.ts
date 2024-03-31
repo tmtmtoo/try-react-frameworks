@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { DataConsistencyError, IoError } from "./repositories";
 import {
     LoginOrSignupCommand,
     RepositoryError,
@@ -7,7 +8,6 @@ import {
     parseLoginOrSignupCommand,
 } from "./usecases";
 import { DisplayName, Email, OrganizationId, Role, UserId } from "./values";
-import { DataConsistencyError, IoError } from "./repositories";
 
 describe("when parse loginOrSignupCommand", () => {
     it("fails if given invalid email", () => {
