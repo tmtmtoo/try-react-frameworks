@@ -16,6 +16,7 @@ import {
     parseUserId,
 } from "../values";
 import { factoryFindUser, factoryPersitUser } from "./pg";
+import { selectBelongingOrganizationByUserId } from "backend/gen/queries_sql";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;
@@ -111,7 +112,7 @@ describe("when postgresql given fixtures", () => {
         expect(result.error).toBeInstanceOf(IoError);
     });
 
-    it("persitUser return User", async () => {
+    it("persitUser return user id", async () => {
         const user = {
             id: parseUserId("018e75eb-6cf7-7730-a5a3-6ff60f027d74")
                 .value as UserId,
@@ -137,25 +138,53 @@ describe("when postgresql given fixtures", () => {
         };
         const persitUser = factoryPersitUser(pgPool);
         const result = await persitUser(user, undefined);
-        expect(result.value).toStrictEqual({
-            id: "018e75eb-6cf7-7730-a5a3-6ff60f027d74",
-            displayName: "Foobar",
-            email: "fooooooo@example.com",
+        expect(result.value).toStrictEqual(
+            "018e75eb-6cf7-7730-a5a3-6ff60f027d74",
+        );
+    });
+
+    it("persistUser save with organizations", async () => {
+        const user = {
+            id: "018eaef1-675a-7b55-9f88-431db43b0e05" as UserId,
+            displayName: "Piyo" as DisplayName,
+            email: "piyo@example.com" as Email,
             organizations: [
                 {
-                    id: "018e75ed-dfe8-7a5b-927c-bda45bb3393f",
-                    displayName: "SuperHyper",
-                    role: "admin",
+                    id: "018eaef3-73ea-75a1-88da-518d611230bb" as OrganizationId,
+                    displayName: "UltraHyper" as DisplayName,
+                    role: "admin" as Role,
+                },
+                {
+                    id: "018eaef4-287b-724b-aeb6-cd2cc7179d4e" as OrganizationId,
+                    displayName: "Yay" as DisplayName,
+                    role: "member" as Role,
+                },
+            ],
+        };
+        const persitUser = factoryPersitUser(pgPool);
+        await persitUser(user, undefined);
+        const pgClient = await pgPool.connect();
+        try {
+            const result = await selectBelongingOrganizationByUserId(pgClient, {
+                userId: "018eaef1-675a-7b55-9f88-431db43b0e05",
+            });
+            expect(result).toStrictEqual([
+                {
+                    organizationId: "018eaef3-73ea-75a1-88da-518d611230bb",
+                    organizationName: "UltraHyper",
+                    roleName: "admin",
                     authorityExample: true,
                 },
                 {
-                    id: "018e75ef-c299-7784-9928-758b670526d0",
-                    displayName: "OkOk",
-                    role: "member",
+                    organizationId: "018eaef4-287b-724b-aeb6-cd2cc7179d4e",
+                    organizationName: "Yay",
+                    roleName: "member",
                     authorityExample: false,
                 },
-            ],
-        });
+            ]);
+        } finally {
+            pgClient.release();
+        }
     });
 
     afterAll(async () => {

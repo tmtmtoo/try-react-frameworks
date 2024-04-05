@@ -1,6 +1,6 @@
 import { Component, Result } from "../types";
 import { User } from "./entities";
-import { Email } from "./values";
+import { Email, UserId } from "./values";
 
 export class IoError extends Error {
     // biome-ignore lint: <any>
@@ -27,5 +27,5 @@ export type FindUser<Context> = Component<
 export type PersistUser<Context> = Component<
     User,
     Context,
-    Result<User, IoError | DataConsistencyError | Error>
+    Result<UserId, IoError | DataConsistencyError | Error>
 >;

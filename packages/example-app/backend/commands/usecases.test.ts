@@ -35,7 +35,7 @@ describe("when parse loginOrSignupCommand", () => {
 });
 
 describe("when execute loginOrSignupUseCase", () => {
-    it("return user if founds by email", async () => {
+    it("return user id if founds by email", async () => {
         const user = {
             id: "018e8e8e-e5c2-7b45-b3eb-6570867230e5" as UserId,
             displayName: "aaa" as DisplayName,
@@ -55,7 +55,7 @@ describe("when execute loginOrSignupUseCase", () => {
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
-        expect(result.value).toStrictEqual(user);
+        expect(result.value).toStrictEqual(user.id);
     });
     it("return user if not founds by email", async () => {
         const user = {

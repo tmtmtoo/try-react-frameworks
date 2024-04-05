@@ -145,7 +145,7 @@ export const factoryPersitUser =
     <Context>(pool: Pool): PersistUser<Context> =>
     async (user: User) => {
         try {
-            const value = await tx(pool, async (conn) => {
+            await tx(pool, async (conn) => {
                 await insertUser(conn, { id: user.id });
                 await insertUserProfile(conn, {
                     id: uuidv7(),
@@ -173,36 +173,8 @@ export const factoryPersitUser =
                         belongId,
                     });
                 }
-
-                const selectedUser = await selectLatestUserProfileByEmail(
-                    conn,
-                    { email: user.email },
-                );
-
-                if (selectedUser === null) {
-                    throw new DataConsistencyError(
-                        `failed to select inserted user: ${user.email}`,
-                    );
-                }
-
-                const organizations = await selectBelongingOrganizationByUserId(
-                    conn,
-                    { userId: selectedUser.userId },
-                );
-
-                return intoUserMayException({
-                    id: selectedUser.userId,
-                    name: selectedUser.name ? selectedUser.name : null,
-                    email: selectedUser.email,
-                    organizations: organizations.map((org) => ({
-                        id: org.organizationId,
-                        name: org.organizationName,
-                        role: org.roleName,
-                        authorityExample: org.authorityExample,
-                    })),
-                });
             });
-            return { value };
+            return { value: user.id };
         } catch (e) {
             if (e instanceof DataConsistencyError) {
                 return { error: e };
