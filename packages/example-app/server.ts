@@ -1,8 +1,34 @@
 import { createRequestHandler } from "@remix-run/express";
+import { parseConfig } from "app.config";
+import { factoryAuth } from "app/authenticator";
+import {
+    factoryFindUser,
+    factoryPersitUser,
+} from "backend/commands/infrastructures/pg";
+import { factoryLoginOrSignupUseCase } from "backend/commands/usecases";
 import express from "express";
-
-// notice that the result of `remix build` is "just a module"
+import pg from "pg";
 import * as build from "./build/index.js";
+
+const config = parseConfig({
+    databaseUrl: process.env.DATABASE_URL,
+    sessionSecret: process.env.SESSION_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+});
+
+const pgPool = new pg.Pool({ connectionString: config.databaseUrl });
+
+const findUser = factoryFindUser(pgPool);
+
+const persistUser = factoryPersitUser(pgPool);
+
+const loginOrSignup = factoryLoginOrSignupUseCase(findUser, persistUser);
+
+const { authenticator, sessionStorage } = factoryAuth(
+    loginOrSignup,
+    config.sessionSecret,
+    config.nodeEnv === "production",
+);
 
 const app = express();
 
@@ -14,9 +40,9 @@ app.all(
     createRequestHandler({
         // @ts-ignore
         build,
-        mode: process.env.NODE_ENV,
+        mode: config.nodeEnv,
         getLoadContext() {
-            return { foo: "aaa" };
+            return { authenticator, sessionStorage };
         },
     }),
 );

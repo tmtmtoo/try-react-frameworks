@@ -1,14 +1,34 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/node";
-import { Form } from "@remix-run/react";
+import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 
-export async function action({ request, context }: ActionFunctionArgs) {
-    const x = context.foo;
-    const body = await request.formData();
-    const email = body.get("email");
-    return redirect(`/${x}/${email}`);
-}
+export const action = async ({ request, context }: ActionFunctionArgs) => {
+    await context.authenticator.authenticate("form", request, {
+        successRedirect: "/",
+        failureRedirect: "/login",
+    });
+};
+
+type LoaderError = { message: string } | null;
+
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+    await context.authenticator.isAuthenticated(request, {
+        successRedirect: "/",
+    });
+
+    const session = await context.sessionStorage.getSession(
+        request.headers.get("Cookie"),
+    );
+
+    const error = session.get(
+        context.authenticator.sessionErrorKey,
+    ) as LoaderError;
+
+    return json({ error });
+};
 
 export default function Login() {
+    const { error } = useLoaderData<typeof loader>();
+
     return (
         <div
             style={{
@@ -39,6 +59,7 @@ export default function Login() {
                 <button type="submit" style={{ cursor: "pointer" }}>
                     LOGIN
                 </button>
+                {error ? <label>{error.message}</label> : null}
             </Form>
         </div>
     );
