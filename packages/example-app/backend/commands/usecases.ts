@@ -1,7 +1,13 @@
 import { Component, Result } from "../types";
 import { createUserWithDefaultOrganization } from "./entities";
 import { FindUser, PersistUser } from "./repositories";
-import { DisplayName, Email, UserId, parseDisplayName, parseEmail } from "./values";
+import {
+    DisplayName,
+    Email,
+    UserId,
+    parseDisplayName,
+    parseEmail,
+} from "./values";
 
 export class RepositoryError extends Error {
     // biome-ignore lint: <any>
@@ -49,7 +55,10 @@ export const parseLoginOrSignupCommand = (
     };
 };
 
-export type LoginOrSignupResult = Result<UserId, RepositoryError | UnknownError>;
+export type LoginOrSignupResult = Result<
+    UserId,
+    RepositoryError | UnknownError
+>;
 
 export type LoginOrSignupUseCase<Context> = Component<
     LoginOrSignupCommand,

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { selectBelongingOrganizationByUserId } from "backend/gen/queries_sql";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -16,7 +17,6 @@ import {
     parseUserId,
 } from "../values";
 import { factoryFindUser, factoryPersitUser } from "./pg";
-import { selectBelongingOrganizationByUserId } from "backend/gen/queries_sql";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;

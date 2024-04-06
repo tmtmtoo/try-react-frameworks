@@ -28,11 +28,14 @@ export interface SelectLatestUserProfileByEmailRow {
     name: string | null;
 }
 
-export async function selectLatestUserProfileByEmail(client: Client, args: SelectLatestUserProfileByEmailArgs): Promise<SelectLatestUserProfileByEmailRow | null> {
+export async function selectLatestUserProfileByEmail(
+    client: Client,
+    args: SelectLatestUserProfileByEmailArgs,
+): Promise<SelectLatestUserProfileByEmailRow | null> {
     const result = await client.query({
         text: selectLatestUserProfileByEmailQuery,
         values: [args.email],
-        rowMode: "array"
+        rowMode: "array",
     });
     if (result.rows.length !== 1) {
         return null;
@@ -41,7 +44,7 @@ export async function selectLatestUserProfileByEmail(client: Client, args: Selec
     return {
         userId: row[0],
         email: row[1],
-        name: row[2]
+        name: row[2],
     };
 }
 
@@ -94,18 +97,21 @@ export interface SelectBelongingOrganizationByUserIdRow {
     authorityExample: boolean;
 }
 
-export async function selectBelongingOrganizationByUserId(client: Client, args: SelectBelongingOrganizationByUserIdArgs): Promise<SelectBelongingOrganizationByUserIdRow[]> {
+export async function selectBelongingOrganizationByUserId(
+    client: Client,
+    args: SelectBelongingOrganizationByUserIdArgs,
+): Promise<SelectBelongingOrganizationByUserIdRow[]> {
     const result = await client.query({
         text: selectBelongingOrganizationByUserIdQuery,
         values: [args.userId],
-        rowMode: "array"
+        rowMode: "array",
     });
-    return result.rows.map(row => {
+    return result.rows.map((row) => {
         return {
             organizationId: row[0],
             organizationName: row[1],
             roleName: row[2],
-            authorityExample: row[3]
+            authorityExample: row[3],
         };
     });
 }
@@ -117,11 +123,14 @@ export interface InsertUserArgs {
     id: string;
 }
 
-export async function insertUser(client: Client, args: InsertUserArgs): Promise<void> {
+export async function insertUser(
+    client: Client,
+    args: InsertUserArgs,
+): Promise<void> {
     await client.query({
         text: insertUserQuery,
         values: [args.id],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -134,11 +143,14 @@ export interface InsertUserEmailRegistrationArgs {
     email: string;
 }
 
-export async function insertUserEmailRegistration(client: Client, args: InsertUserEmailRegistrationArgs): Promise<void> {
+export async function insertUserEmailRegistration(
+    client: Client,
+    args: InsertUserEmailRegistrationArgs,
+): Promise<void> {
     await client.query({
         text: insertUserEmailRegistrationQuery,
         values: [args.id, args.userId, args.email],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -151,11 +163,14 @@ export interface InsertUserProfileArgs {
     name: string | null;
 }
 
-export async function insertUserProfile(client: Client, args: InsertUserProfileArgs): Promise<void> {
+export async function insertUserProfile(
+    client: Client,
+    args: InsertUserProfileArgs,
+): Promise<void> {
     await client.query({
         text: insertUserProfileQuery,
         values: [args.id, args.userId, args.name],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -166,11 +181,14 @@ export interface InsertOrgaizationArgs {
     id: string;
 }
 
-export async function insertOrgaization(client: Client, args: InsertOrgaizationArgs): Promise<void> {
+export async function insertOrgaization(
+    client: Client,
+    args: InsertOrgaizationArgs,
+): Promise<void> {
     await client.query({
         text: insertOrgaizationQuery,
         values: [args.id],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -183,11 +201,14 @@ export interface InsertOrganizationProfileArgs {
     name: string;
 }
 
-export async function insertOrganizationProfile(client: Client, args: InsertOrganizationProfileArgs): Promise<void> {
+export async function insertOrganizationProfile(
+    client: Client,
+    args: InsertOrganizationProfileArgs,
+): Promise<void> {
     await client.query({
         text: insertOrganizationProfileQuery,
         values: [args.id, args.organizationId, args.name],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -200,11 +221,14 @@ export interface InsertBelongArgs {
     organizationId: string;
 }
 
-export async function insertBelong(client: Client, args: InsertBelongArgs): Promise<void> {
+export async function insertBelong(
+    client: Client,
+    args: InsertBelongArgs,
+): Promise<void> {
     await client.query({
         text: insertBelongQuery,
         values: [args.id, args.userId, args.organizationId],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
 
@@ -217,11 +241,13 @@ export interface InsertAssignArgs {
     belongId: string;
 }
 
-export async function insertAssign(client: Client, args: InsertAssignArgs): Promise<void> {
+export async function insertAssign(
+    client: Client,
+    args: InsertAssignArgs,
+): Promise<void> {
     await client.query({
         text: insertAssignQuery,
         values: [args.id, args.roleName, args.belongId],
-        rowMode: "array"
+        rowMode: "array",
     });
 }
-
