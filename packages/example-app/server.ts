@@ -12,6 +12,7 @@ app.use(express.static("public"));
 app.all(
     "*",
     createRequestHandler({
+        // @ts-ignore
         build,
         mode: process.env.NODE_ENV,
         getLoadContext() {
