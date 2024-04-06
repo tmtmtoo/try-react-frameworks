@@ -8,22 +8,36 @@ insert into users values (
     'a03b5bb4-661b-4725-80d7-c3a2d2ed1525'
 );
 
+insert into user_email_registration values (
+    'af76e455-a84c-4384-ac37-b45a99003207',
+    '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
+    '_example@example.com',
+    '2024/1/1 12:00:00'
+), (
+    'af76e455-a84c-4384-ac37-b45a99003208',
+    '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
+    'example@example.com',
+    '2024/1/1 12:00:01'
+), (
+    '6986f60d-f5e2-4224-93c9-d57e96c053d0',
+    'a03b5bb4-661b-4725-80d7-c3a2d2ed1525',
+    'foobar@example.com',
+    '2024/1/1 12:00:00'
+);
+
 insert into user_profile values (
     'af76e455-a84c-4384-ac37-b45a99003206',
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
-    'example@example.com',
     '_example',
     '2024/1/1 12:00:00'
 ), (
     '57725af6-457f-4e46-ae95-29e142581a21',
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
-    'example@example.com',
     'example',
     '2024/1/1 12:00:01'
 ), (
     '6986f60d-f5e2-4224-93c9-d57e96c053d9',
     'a03b5bb4-661b-4725-80d7-c3a2d2ed1525',
-    'foobar@example.com',
     'foobar',
     '2024/1/1 12:00:00'
 );

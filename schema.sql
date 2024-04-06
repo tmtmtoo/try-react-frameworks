@@ -2,17 +2,25 @@ create table users (
     id uuid primary key
 );
 
-create table user_profile (
+create table user_email_registration (
     id uuid primary key,
     user_id uuid not null,
     email text not null,
+    created_at timestamp not null default current_timestamp,
+
+    constraint fk_user_email_registration_user foreign key (user_id) references users (id)
+);
+
+create index idx_user_email_registration_email on user_email_registration using btree (email);
+
+create table user_profile (
+    id uuid primary key,
+    user_id uuid not null,
     name text,
     created_at timestamp not null default current_timestamp,
 
     constraint fk_user_profile_user foreign key (user_id) references users (id)
 );
-
-create index idx_user_profile_email on user_profile using btree (email);
 
 create table user_delete (
     id uuid primary key,

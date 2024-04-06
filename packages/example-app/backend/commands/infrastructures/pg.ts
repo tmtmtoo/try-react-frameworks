@@ -6,6 +6,7 @@ import {
     insertOrgaization,
     insertOrganizationProfile,
     insertUser,
+    insertUserEmailRegistration,
     insertUserProfile,
     selectBelongingOrganizationByUserId,
     selectLatestUserProfileByEmail,
@@ -147,11 +148,15 @@ export const factoryPersitUser =
         try {
             await tx(pool, async (conn) => {
                 await insertUser(conn, { id: user.id });
+                await insertUserEmailRegistration(conn, {
+                    id: uuidv7(),
+                    userId: user.id,
+                    email: user.email,
+                });
                 await insertUserProfile(conn, {
                     id: uuidv7(),
                     userId: user.id,
                     name: user.displayName ? user.displayName : null,
-                    email: user.email,
                 });
 
                 for (const organization of user.organizations) {
@@ -176,9 +181,6 @@ export const factoryPersitUser =
             });
             return { value: user.id };
         } catch (e) {
-            if (e instanceof DataConsistencyError) {
-                return { error: e };
-            }
             return {
                 error: new IoError("connection or transaction error", {
                     cause: e,

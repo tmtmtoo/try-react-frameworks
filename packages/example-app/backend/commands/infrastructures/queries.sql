@@ -1,14 +1,15 @@
 -- name: SelectLatestUserProfileByEmail :one
 select
     user_profile.user_id,
-    user_profile.email,
+    user_email_registration.email,
     user_profile.name
 from user_profile
+inner join user_email_registration on user_profile.user_id = user_email_registration.user_id
 left join user_delete on user_profile.user_id = user_delete.user_id
 where
     user_delete.id is null
-    and user_profile.email = $1
-order by user_profile.created_at desc
+    and user_email_registration.email = $1
+order by user_profile.created_at desc, user_email_registration.created_at desc
 limit 1;
 
 -- name: SelectBelongingOrganizationByUserId :many
@@ -52,8 +53,11 @@ order by assign.belong_id asc, assign.created_at desc, belong.created_at asc;
 -- name: InsertUser :exec
 insert into users (id) values ($1);
 
+-- name: InsertUserEmailRegistration :exec
+insert into user_email_registration (id, user_id, email) values ($1, $2, $3);
+
 -- name: InsertUserProfile :exec
-insert into user_profile (id, user_id, email, name) values ($1, $2, $3, $4);
+insert into user_profile (id, user_id, name) values ($1, $2, $3);
 
 -- name: InsertOrgaization :exec
 insert into organizations (id) values ($1);

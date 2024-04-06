@@ -27,5 +27,5 @@ export type FindUser<Context> = Component<
 export type PersistUser<Context> = Component<
     User,
     Context,
-    Result<UserId, IoError | DataConsistencyError | Error>
+    Result<UserId, IoError | Error>
 >;
