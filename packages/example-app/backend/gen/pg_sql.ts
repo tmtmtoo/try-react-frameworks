@@ -379,7 +379,13 @@ select
 from belong
 left join dismiss on belong.id = dismiss.belong_id
 left join organization_delete on belong.organization_id = organization_delete.organization_id
-where dismiss.id is null and organization_delete.id is null and belong.user_id = $1`;
+left join user_delete on belong.user_id = user_delete.user_id
+where
+    dismiss.id is null
+    and organization_delete.id is null
+    and user_delete.id is null
+    and belong.user_id = $1
+order by belong.created_at asc`;
 
 export interface SelectBelongingOrganizationsArgs {
     userId: string;
@@ -484,7 +490,6 @@ export async function selectBelongingOrganizations2(client: Client, args: Select
 export const selectOrganizationUsersQuery = `-- name: SelectOrganizationUsers :many
 select
     belong.user_id,
-    belong.organization_id,
     (
         select roles.name
         from assign
@@ -504,12 +509,19 @@ select
         select user_profile.name
         from user_profile
         where user_profile.user_id = belong.user_id
+        order by user_profile.created_at desc
         limit 1
     ) as user_name
 from belong
 left join organization_delete on belong.organization_id = organization_delete.organization_id
 left join dismiss on belong.id = dismiss.belong_id
-where organization_delete.id is null and dismiss.id is null and belong.organization_id = $1`;
+left join user_delete on belong.user_id = user_delete.user_id
+where
+    organization_delete.id is null
+    and dismiss.id is null
+    and user_delete.id is null
+    and belong.organization_id = $1
+order by belong.created_at asc`;
 
 export interface SelectOrganizationUsersArgs {
     organizationId: string;
@@ -517,7 +529,6 @@ export interface SelectOrganizationUsersArgs {
 
 export interface SelectOrganizationUsersRow {
     userId: string;
-    organizationId: string;
     roleName: string;
     email: string;
     userName: string | null;
@@ -532,10 +543,9 @@ export async function selectOrganizationUsers(client: Client, args: SelectOrgani
     return result.rows.map(row => {
         return {
             userId: row[0],
-            organizationId: row[1],
-            roleName: row[2],
-            email: row[3],
-            userName: row[4]
+            roleName: row[1],
+            email: row[2],
+            userName: row[3]
         };
     });
 }

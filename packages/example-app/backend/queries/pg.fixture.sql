@@ -1,10 +1,15 @@
 begin;
 
 insert into users values (
+    -- this user will delete
     '3f020291-cba1-46c1-9f2d-677a164b4309'
 ), (
+    -- user: example
+    -- belonging organization: Example Organization / Foobar Organization
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7'
 ), (
+    -- user: foobar
+    -- belonging organization: Foobar Organization
     'a03b5bb4-661b-4725-80d7-c3a2d2ed1525'
 );
 
@@ -59,10 +64,15 @@ insert into user_delete values (
 );
 
 insert into organizations values (
+    -- this organization will delete
     '868eeffa-a18c-4e26-ba76-6a394c9422d2'
 ), (
+    -- organization: Example Organization
+    -- user: example / (deleted user)
     '12664faf-373e-41f8-95b9-cb796afa3ae9'
 ), (
+    -- organization: Foobar Organization
+    -- user: example / foobar
     'e1db2424-1fb4-4cc2-9233-c430f1a49819'
 );
 
@@ -90,6 +100,11 @@ insert into organization_delete values (
 );
 
 insert into belong values (
+    '165099f8-f2d6-497f-b24a-fa4bff3a0544',
+    '3f020291-cba1-46c1-9f2d-677a164b4309',
+    '12664faf-373e-41f8-95b9-cb796afa3ae9',
+    '2024/1/1 12:00:00'
+), (
     '165099f8-f2d6-497f-b24a-fa4bffe30544',
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
     '12664faf-373e-41f8-95b9-cb796afa3ae9',
@@ -108,7 +123,7 @@ insert into belong values (
     '36e0cb29-6b1f-4a99-bb0d-68245cec6de7',
     'a03b5bb4-661b-4725-80d7-c3a2d2ed1525',
     'e1db2424-1fb4-4cc2-9233-c430f1a49819',
-    '2024/1/1 12:00:01'
+    '2024/1/1 12:00:02'
 );
 
 insert into dismiss values (
