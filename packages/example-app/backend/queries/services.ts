@@ -1,19 +1,24 @@
+import {
+    selectBelongingOrganizations,
+    selectOrganizationUsers,
+    selectUser,
+} from "backend/gen/pg_sql";
 import { Component, Result } from "backend/types";
 import { Pool } from "pg";
 
-export type HogeInput = {
+export type HomeQueryInput = {
     userId: string;
     organizationId: string;
 };
 
-export type Hoge = {
+export type Home = {
     id: string;
     email: string;
     name?: string;
     belongingOrganizations: {
         id: string;
         name: string;
-    }[],
+    }[];
     selectedOrganization: {
         id: string;
         name: string;
@@ -24,22 +29,76 @@ export type Hoge = {
             email: string;
             name?: string;
             role: string;
-        }
-    }
+        }[];
+    };
 };
 
-export type HogeResult = Result<Hoge, Error>;
+export type HomeQueryResult = Result<Home, Error>;
 
-export type HogeQuerySerive<Context> = Component<
-    HogeInput,
+export type HomeQuerySerive<Context> = Component<
+    HomeQueryInput,
     Context,
-    HogeResult
+    HomeQueryResult
 >;
 
-/*
-export const factoryHogeQueryService =
-    <Context>(pool: Pool): HogeQuerySerive<Context> =>
-    async (input, ctx) => {
+export const factoryHomeQueryService =
+    <Context>(pool: Pool): HomeQuerySerive<Context> =>
+    async ({ userId, organizationId }) => {
         const client = await pool.connect();
+
+        try {
+            const user = await selectUser(client, { id: userId });
+
+            if (!user) {
+                throw new Error(`user id: ${userId} not found`);
+            }
+
+            const belongingOrganizations = await selectBelongingOrganizations(
+                client,
+                { userId },
+            );
+            const selectedOrganization = belongingOrganizations.find(
+                (org) => org.organizationId === organizationId,
+            );
+            if (!selectedOrganization) {
+                throw new Error(`organization id: ${organizationId} not found`);
+            }
+
+            const organizationUsers = await selectOrganizationUsers(client, {
+                organizationId,
+            });
+
+            const home: Home = {
+                id: user.id,
+                email: user.email,
+                name: user.name?.toString(),
+                belongingOrganizations: belongingOrganizations.map((org) => ({
+                    id: org.organizationId,
+                    name: org.organizationName,
+                })),
+                selectedOrganization: {
+                    id: selectedOrganization.organizationId,
+                    name: selectedOrganization.organizationName,
+                    role: selectedOrganization.roleName,
+                    authorityExample: selectedOrganization.authorityExample,
+                    users: organizationUsers.map((user) => ({
+                        id: user.userId,
+                        name: user.userName?.toString(),
+                        email: user.email,
+                        role: user.roleName,
+                    })),
+                },
+            };
+
+            return { value: home };
+        } catch (e) {
+            if (e instanceof Error) {
+                return { error: e };
+            }
+            return {
+                error: new Error("Unknown error has occured", { cause: e }),
+            };
+        } finally {
+            client.release();
+        }
     };
-*/

@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { factoryHomeQueryService } from "./services";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;
@@ -225,6 +226,54 @@ describe("when postgresql given fixtures", () => {
         } finally {
             client.release();
         }
+    });
+
+    it("HomeQueryService returns HomeModel should be success", async () => {
+        const homeQuerySerive = factoryHomeQueryService(pgPool);
+        const home = await homeQuerySerive(
+            {
+                userId: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",
+                organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+            },
+            null,
+        );
+        expect(home).toStrictEqual({
+            value: {
+                id: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",
+                email: "example@example.com",
+                name: "example",
+                belongingOrganizations: [
+                    {
+                        id: "12664faf-373e-41f8-95b9-cb796afa3ae9",
+                        name: "Example Organization",
+                    },
+                    {
+                        id: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+                        name: "Foobar Organization",
+                    },
+                ],
+                selectedOrganization: {
+                    id: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+                    name: "Foobar Organization",
+                    role: "member",
+                    authorityExample: false,
+                    users: [
+                        {
+                            id: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",
+                            name: "example",
+                            email: "example@example.com",
+                            role: "member",
+                        },
+                        {
+                            id: "a03b5bb4-661b-4725-80d7-c3a2d2ed1525",
+                            name: "foobar",
+                            email: "foobar@example.com",
+                            role: "admin",
+                        },
+                    ],
+                },
+            },
+        });
     });
 
     afterAll(async () => {
