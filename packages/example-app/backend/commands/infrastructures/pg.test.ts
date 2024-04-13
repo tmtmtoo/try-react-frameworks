@@ -24,18 +24,19 @@ describe("when postgresql given fixtures", () => {
 
     beforeAll(
         async () => {
-            pgContainer = await new GenericContainer("postgres:latest")
-                .withExposedPorts(5432)
+            pgContainer = await new GenericContainer("postgres:15")
+                .withExposedPorts(5434)
                 .withEnvironment({
                     POSTGRES_USER: "dev",
                     POSTGRES_HOST_AUTH_METHOD: "trust",
+                    PGPORT: "5434"
                 })
                 .withWaitStrategy(Wait.forListeningPorts())
                 .start();
 
             pgPool = new Pool({
                 host: pgContainer.getHost(),
-                port: pgContainer.getMappedPort(5432),
+                port: pgContainer.getMappedPort(5434),
                 database: "dev",
                 user: "dev",
             });
@@ -101,7 +102,7 @@ describe("when postgresql given fixtures", () => {
     it("findUser returns Error with bad connection pool", async () => {
         const badPool = new Pool({
             host: pgContainer.getHost(),
-            port: pgContainer.getMappedPort(5432),
+            port: pgContainer.getMappedPort(5434),
             database: "boooooo",
             user: "dev",
         });
