@@ -57,7 +57,7 @@ insert into users_profile values (
     '2024/1/1 12:00:00'
 );
 
-insert into user_delete values (
+insert into users_delete values (
     '25015370-ebf7-47d2-82a0-f644c4d4842f',
     '3f020291-cba1-46c1-9f2d-677a164b4309',
     '2024/1/1 12:00:01'

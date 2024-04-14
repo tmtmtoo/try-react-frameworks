@@ -22,12 +22,12 @@ create table users_profile (
     constraint fk_users_profile_user foreign key (user_id) references users (id)
 );
 
-create table user_delete (
+create table users_delete (
     id uuid primary key,
     user_id uuid not null,
     created_at timestamp not null default current_timestamp,
 
-    constraint fk_user_delete_user foreign key (user_id) references users (id)
+    constraint fk_users_delete_user foreign key (user_id) references users (id)
 );
 
 create table organizations (

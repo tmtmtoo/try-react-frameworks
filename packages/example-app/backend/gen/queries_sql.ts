@@ -11,9 +11,9 @@ select
     users_profile.name
 from users_profile
 inner join users_email_registration on users_profile.user_id = users_email_registration.user_id
-left join user_delete on users_profile.user_id = user_delete.user_id
+left join users_delete on users_profile.user_id = users_delete.user_id
 where
-    user_delete.id is null
+    users_delete.id is null
     and users_email_registration.email = $1
 order by users_profile.created_at desc, users_email_registration.created_at desc
 limit 1`;
