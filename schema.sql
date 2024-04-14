@@ -67,12 +67,12 @@ create table belong (
     ) references organizations (id)
 );
 
-create table dismiss (
+create table belong_dismiss (
     id uuid primary key,
     belong_id uuid not null,
     created_at timestamp not null default current_timestamp,
 
-    constraint fk_dismiss_belong foreign key (belong_id) references belong (id)
+    constraint fk_belong_dismiss_belong foreign key (belong_id) references belong (id)
 );
 
 create table roles (

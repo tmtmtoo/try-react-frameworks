@@ -101,7 +101,7 @@ insert into belong values (
     '2024/1/1 12:00:01'
 );
 
-insert into dismiss values (
+insert into belong_dismiss values (
     'd5f92059-f281-4967-b48d-4603518760bf',
     'df75fb46-125d-4187-a8d6-ef8688d6409c',
     '2024/1/1 12:00:00'

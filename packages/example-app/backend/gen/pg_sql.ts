@@ -76,7 +76,7 @@ inner join roles on assign.role_name = roles.name
 where
     belong.user_id = $1
     and belong.id not in (
-        select belong_id from dismiss
+        select belong_id from belong_dismiss
     )
     and latest_organizations_profiles.organization_id not in (
         select organization_id from organizations_delete
@@ -292,11 +292,11 @@ select
         limit 1
     )
 from belong
-left join dismiss on belong.id = dismiss.belong_id
+left join belong_dismiss on belong.id = belong_dismiss.belong_id
 left join organizations_delete on belong.organization_id = organizations_delete.organization_id
 left join users_delete on belong.user_id = users_delete.user_id
 where
-    dismiss.id is null
+    belong_dismiss.id is null
     and organizations_delete.id is null
     and users_delete.id is null
     and belong.user_id = $1
@@ -356,11 +356,11 @@ select
     ) as user_name
 from belong
 left join organizations_delete on belong.organization_id = organizations_delete.organization_id
-left join dismiss on belong.id = dismiss.belong_id
+left join belong_dismiss on belong.id = belong_dismiss.belong_id
 left join users_delete on belong.user_id = users_delete.user_id
 where
     organizations_delete.id is null
-    and dismiss.id is null
+    and belong_dismiss.id is null
     and users_delete.id is null
     and belong.organization_id = $1
 order by belong.created_at asc`;

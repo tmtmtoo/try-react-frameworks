@@ -79,7 +79,7 @@ inner join roles on assign.role_name = roles.name
 where
     belong.user_id = $1
     and belong.id not in (
-        select belong_id from dismiss
+        select belong_id from belong_dismiss
     )
     and latest_organizations_profiles.organization_id not in (
         select organization_id from organizations_delete
