@@ -89,3 +89,15 @@ create table assign (
     constraint fk_assign_role foreign key (role_name) references roles (name),
     constraint fk_assign_belong foreign key (belong_id) references belong (id)
 );
+
+create table organizations_switch (
+    id uuid primary key,
+    user_id uuid not null,
+    organization_id uuid not null,
+    created_at timestamp not null default current_timestamp,
+
+    constraint fk_organizations_switch_user foreign key (user_id) references users (id),
+    constraint fk_organizations_switch_organization foreign key (
+        organization_id
+    ) references organizations (id)
+);

@@ -159,4 +159,11 @@ insert into assign values (
     '2024/1/1 12:00:01'
 );
 
+insert into organizations_switch values (
+    'b91cd376-8fd3-4227-8b6f-11afb370cd1f',
+    '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
+    'e1db2424-1fb4-4cc2-9233-c430f1a49819',
+    '2024/1/1 12:00:00'
+);
+
 commit;

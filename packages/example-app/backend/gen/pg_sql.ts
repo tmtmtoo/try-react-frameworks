@@ -392,3 +392,57 @@ export async function selectOrganizationUsers(client: Client, args: SelectOrgani
     });
 }
 
+export const selectSwitchedOrganizationQuery = `-- name: SelectSwitchedOrganization :one
+with last_switched_organization as (
+    select
+        organizations_switch.organization_id,
+        organizations_switch.user_id
+    from organizations_switch
+    where organizations_switch.user_id = $1
+    order by organizations_switch.created_at desc
+    limit 1
+)
+
+select
+    belong.organization_id as first_belonged_organization_id,
+    last_switched_organization.organization_id as last_switched_organization_id
+from belong
+left join
+    last_switched_organization
+    on belong.user_id = last_switched_organization.user_id
+left join organizations_delete on belong.organization_id = organizations_delete.organization_id
+left join belong_dismiss on belong.id = belong_dismiss.belong_id
+left join users_delete on belong.user_id = users_delete.user_id
+where
+    organizations_delete.id is null
+    and belong_dismiss.id is null
+    and users_delete.id is null
+    and belong.user_id = $1
+order by belong.created_at asc
+limit 1`;
+
+export interface SelectSwitchedOrganizationArgs {
+    userId: string;
+}
+
+export interface SelectSwitchedOrganizationRow {
+    firstBelongedOrganizationId: string;
+    lastSwitchedOrganizationId: string | null;
+}
+
+export async function selectSwitchedOrganization(client: Client, args: SelectSwitchedOrganizationArgs): Promise<SelectSwitchedOrganizationRow | null> {
+    const result = await client.query({
+        text: selectSwitchedOrganizationQuery,
+        values: [args.userId],
+        rowMode: "array"
+    });
+    if (result.rows.length !== 1) {
+        return null;
+    }
+    const row = result.rows[0];
+    return {
+        firstBelongedOrganizationId: row[0],
+        lastSwitchedOrganizationId: row[1]
+    };
+}
+

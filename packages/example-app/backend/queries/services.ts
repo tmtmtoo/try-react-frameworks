@@ -1,6 +1,7 @@
 import {
     selectBelongingOrganizations,
     selectOrganizationUsers,
+    selectSwitchedOrganization,
     selectUser,
 } from "backend/gen/pg_sql";
 import { Component, Result } from "backend/types";
@@ -91,6 +92,62 @@ export const factoryHomeQueryService =
             };
 
             return { value: home };
+        } catch (e) {
+            if (e instanceof Error) {
+                return { error: e };
+            }
+            return {
+                error: new Error("Unknown error has occured", { cause: e }),
+            };
+        } finally {
+            client.release();
+        }
+    };
+
+export type LastSwitchedOrganizationQueryInput = {
+    userId: string;
+};
+
+export type LastSwitchedOrganization = {
+    lastSwitchedOrganizationId?: string;
+    firstBelongedOranizationId: string;
+};
+
+export type LastSwitchedOrganizationQueryResult = Result<
+    LastSwitchedOrganization,
+    Error
+>;
+
+export type LastSwitchedOrganizationQueryService<Context> = Component<
+    LastSwitchedOrganizationQueryInput,
+    Context,
+    LastSwitchedOrganizationQueryResult
+>;
+
+export const factoryLastSwitchedOrganizationQueryService =
+    <Context>(pool: Pool): LastSwitchedOrganizationQueryService<Context> =>
+    async ({ userId }) => {
+        const client = await pool.connect();
+
+        try {
+            const organization = await selectSwitchedOrganization(client, {
+                userId,
+            });
+
+            if (!organization) {
+                throw new Error(
+                    `belonged oranization not found. user id: ${userId}`,
+                );
+            }
+
+            return {
+                value: {
+                    lastSwitchedOrganizationId:
+                        organization.lastSwitchedOrganizationId?.toString(),
+                    firstBelongedOranizationId:
+                        organization.firstBelongedOrganizationId,
+                },
+            };
         } catch (e) {
             if (e instanceof Error) {
                 return { error: e };

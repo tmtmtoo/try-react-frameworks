@@ -83,3 +83,32 @@ where
     and users_delete.id is null
     and belong.organization_id = $1
 order by belong.created_at asc;
+
+-- name: SelectSwitchedOrganization :one
+with last_switched_organization as (
+    select
+        organizations_switch.organization_id,
+        organizations_switch.user_id
+    from organizations_switch
+    where organizations_switch.user_id = $1
+    order by organizations_switch.created_at desc
+    limit 1
+)
+
+select
+    belong.organization_id as first_belonged_organization_id,
+    last_switched_organization.organization_id as last_switched_organization_id
+from belong
+left join
+    last_switched_organization
+    on belong.user_id = last_switched_organization.user_id
+left join organizations_delete on belong.organization_id = organizations_delete.organization_id
+left join belong_dismiss on belong.id = belong_dismiss.belong_id
+left join users_delete on belong.user_id = users_delete.user_id
+where
+    organizations_delete.id is null
+    and belong_dismiss.id is null
+    and users_delete.id is null
+    and belong.user_id = $1
+order by belong.created_at asc
+limit 1;

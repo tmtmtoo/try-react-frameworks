@@ -7,7 +7,10 @@ import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { factoryHomeQueryService } from "./services";
+import {
+    factoryHomeQueryService,
+    factoryLastSwitchedOrganizationQueryService,
+} from "./services";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;
@@ -273,6 +276,36 @@ describe("when postgresql given fixtures", () => {
                     ],
                 },
             },
+        });
+    });
+
+    it("LastSwitchedOrganizationQueryService returns lastSwitchedOrganizationId and firstBelongedOranizationId", async () => {
+        const queryService =
+            factoryLastSwitchedOrganizationQueryService(pgPool);
+        const swithedOrganization = await queryService(
+            {
+                userId: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",
+            },
+            null,
+        );
+        expect(swithedOrganization.value).toStrictEqual({
+            lastSwitchedOrganizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+            firstBelongedOranizationId: "12664faf-373e-41f8-95b9-cb796afa3ae9",
+        });
+    });
+
+    it("LastSwitchedOrganizationQueryService returns firstBelongedOranizationId", async () => {
+        const queryService =
+            factoryLastSwitchedOrganizationQueryService(pgPool);
+        const swithedOrganization = await queryService(
+            {
+                userId: "a03b5bb4-661b-4725-80d7-c3a2d2ed1525",
+            },
+            null,
+        );
+        expect(swithedOrganization.value).toStrictEqual({
+            lastSwitchedOrganizationId: undefined,
+            firstBelongedOranizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
         });
     });
 
