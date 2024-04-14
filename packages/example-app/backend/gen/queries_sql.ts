@@ -82,7 +82,7 @@ where
         select belong_id from dismiss
     )
     and latest_organizations_profiles.organization_id not in (
-        select organization_id from organization_delete
+        select organization_id from organizations_delete
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc`;
 

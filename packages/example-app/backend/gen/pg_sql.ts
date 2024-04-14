@@ -79,7 +79,7 @@ where
         select belong_id from dismiss
     )
     and latest_organizations_profiles.organization_id not in (
-        select organization_id from organization_delete
+        select organization_id from organizations_delete
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc`;
 
@@ -293,11 +293,11 @@ select
     )
 from belong
 left join dismiss on belong.id = dismiss.belong_id
-left join organization_delete on belong.organization_id = organization_delete.organization_id
+left join organizations_delete on belong.organization_id = organizations_delete.organization_id
 left join users_delete on belong.user_id = users_delete.user_id
 where
     dismiss.id is null
-    and organization_delete.id is null
+    and organizations_delete.id is null
     and users_delete.id is null
     and belong.user_id = $1
 order by belong.created_at asc`;
@@ -355,11 +355,11 @@ select
         limit 1
     ) as user_name
 from belong
-left join organization_delete on belong.organization_id = organization_delete.organization_id
+left join organizations_delete on belong.organization_id = organizations_delete.organization_id
 left join dismiss on belong.id = dismiss.belong_id
 left join users_delete on belong.user_id = users_delete.user_id
 where
-    organization_delete.id is null
+    organizations_delete.id is null
     and dismiss.id is null
     and users_delete.id is null
     and belong.organization_id = $1

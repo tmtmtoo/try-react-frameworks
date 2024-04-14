@@ -93,7 +93,7 @@ insert into organizations_profile values (
     '2024/1/1 12:00:01'
 );
 
-insert into organization_delete values (
+insert into organizations_delete values (
     '2e7dee3f-96c2-4d25-a54a-662f94b5d614',
     '868eeffa-a18c-4e26-ba76-6a394c9422d2',
     '2024/1/1 12:00:00'

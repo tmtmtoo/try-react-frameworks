@@ -45,12 +45,12 @@ create table organizations_profile (
     ) references organizations (id)
 );
 
-create table organization_delete (
+create table organizations_delete (
     id uuid primary key,
     organization_id uuid not null,
     created_at timestamp not null default current_timestamp,
 
-    constraint fk_organization_delete_organization foreign key (
+    constraint fk_organizations_delete_organization foreign key (
         organization_id
     ) references organizations (id)
 );
