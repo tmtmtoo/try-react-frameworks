@@ -15,10 +15,10 @@ limit 1;
 select
     belong.organization_id,
     (
-        select organization_profile.name as organization_name
-        from organization_profile
-        where organization_profile.organization_id = belong.organization_id
-        order by organization_profile.created_at desc
+        select organizations_profile.name as organization_name
+        from organizations_profile
+        where organizations_profile.organization_id = belong.organization_id
+        order by organizations_profile.created_at desc
         limit 1
     ),
     (

@@ -34,13 +34,13 @@ create table organizations (
     id uuid primary key
 );
 
-create table organization_profile (
+create table organizations_profile (
     id uuid primary key,
     organization_id uuid not null,
     name text not null,
     created_at timestamp not null default current_timestamp,
 
-    constraint fk_organization_profile_organization foreign key (
+    constraint fk_organizations_profile_organization foreign key (
         organization_id
     ) references organizations (id)
 );

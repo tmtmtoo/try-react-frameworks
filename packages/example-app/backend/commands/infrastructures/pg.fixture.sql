@@ -56,7 +56,7 @@ insert into organizations values (
     'e1db2424-1fb4-4cc2-9233-c430f1a49819'
 );
 
-insert into organization_profile values (
+insert into organizations_profile values (
     '332fb1cb-04cf-4af0-9db5-e4ff9389265b',
     '12664faf-373e-41f8-95b9-cb796afa3ae9',
     'Example Organization',

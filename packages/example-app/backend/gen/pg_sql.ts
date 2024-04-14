@@ -50,27 +50,27 @@ with latest as (
     select
         organization_id,
         max(created_at) as created_at
-    from organization_profile
+    from organizations_profile
     group by organization_id
 ),
 
-latest_organization_profiles as (
-    select organization_profile.id, organization_profile.organization_id, organization_profile.name, organization_profile.created_at from organization_profile
+latest_organizations_profiles as (
+    select organizations_profile.id, organizations_profile.organization_id, organizations_profile.name, organizations_profile.created_at from organizations_profile
     inner join latest
         on
-            organization_profile.organization_id = latest.organization_id
-            and organization_profile.created_at = latest.created_at
+            organizations_profile.organization_id = latest.organization_id
+            and organizations_profile.created_at = latest.created_at
 )
 
 select distinct on (assign.belong_id)
-    latest_organization_profiles.organization_id as organization_id,
-    latest_organization_profiles.name as organization_name,
+    latest_organizations_profiles.organization_id as organization_id,
+    latest_organizations_profiles.name as organization_name,
     roles.name as role_name,
     roles.example as authority_example
 from belong
 inner join
-    latest_organization_profiles
-    on belong.organization_id = latest_organization_profiles.organization_id
+    latest_organizations_profiles
+    on belong.organization_id = latest_organizations_profiles.organization_id
 inner join assign on belong.id = assign.belong_id
 inner join roles on assign.role_name = roles.name
 where
@@ -78,7 +78,7 @@ where
     and belong.id not in (
         select belong_id from dismiss
     )
-    and latest_organization_profiles.organization_id not in (
+    and latest_organizations_profiles.organization_id not in (
         select organization_id from organization_delete
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc`;
@@ -175,7 +175,7 @@ export async function insertOrgaization(client: Client, args: InsertOrgaizationA
 }
 
 export const insertOrganizationProfileQuery = `-- name: InsertOrganizationProfile :exec
-insert into organization_profile (id, organization_id, name) values ($1, $2, $3)`;
+insert into organizations_profile (id, organization_id, name) values ($1, $2, $3)`;
 
 export interface InsertOrganizationProfileArgs {
     id: string;
@@ -269,10 +269,10 @@ export const selectBelongingOrganizationsQuery = `-- name: SelectBelongingOrgani
 select
     belong.organization_id,
     (
-        select organization_profile.name as organization_name
-        from organization_profile
-        where organization_profile.organization_id = belong.organization_id
-        order by organization_profile.created_at desc
+        select organizations_profile.name as organization_name
+        from organizations_profile
+        where organizations_profile.organization_id = belong.organization_id
+        order by organizations_profile.created_at desc
         limit 1
     ),
     (
