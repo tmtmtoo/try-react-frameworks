@@ -13,13 +13,13 @@ create table users_email_registration (
 
 create index idx_users_email_registration_email on users_email_registration using btree (email);
 
-create table user_profile (
+create table users_profile (
     id uuid primary key,
     user_id uuid not null,
     name text,
     created_at timestamp not null default current_timestamp,
 
-    constraint fk_user_profile_user foreign key (user_id) references users (id)
+    constraint fk_users_profile_user foreign key (user_id) references users (id)
 );
 
 create table user_delete (

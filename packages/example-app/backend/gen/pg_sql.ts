@@ -6,16 +6,16 @@ interface Client {
 
 export const selectLatestUserProfileByEmailQuery = `-- name: SelectLatestUserProfileByEmail :one
 select
-    user_profile.user_id,
+    users_profile.user_id,
     users_email_registration.email,
-    user_profile.name
-from user_profile
-inner join users_email_registration on user_profile.user_id = users_email_registration.user_id
-left join user_delete on user_profile.user_id = user_delete.user_id
+    users_profile.name
+from users_profile
+inner join users_email_registration on users_profile.user_id = users_email_registration.user_id
+left join user_delete on users_profile.user_id = user_delete.user_id
 where
     user_delete.id is null
     and users_email_registration.email = $1
-order by user_profile.created_at desc, users_email_registration.created_at desc
+order by users_profile.created_at desc, users_email_registration.created_at desc
 limit 1`;
 
 export interface SelectLatestUserProfileByEmailArgs {
@@ -143,7 +143,7 @@ export async function insertUserEmailRegistration(client: Client, args: InsertUs
 }
 
 export const insertUserProfileQuery = `-- name: InsertUserProfile :exec
-insert into user_profile (id, user_id, name) values ($1, $2, $3)`;
+insert into users_profile (id, user_id, name) values ($1, $2, $3)`;
 
 export interface InsertUserProfileArgs {
     id: string;
@@ -229,13 +229,13 @@ export const selectUserQuery = `-- name: SelectUser :one
 select
     users.id,
     users_email_registration.email,
-    user_profile.name
+    users_profile.name
 from users
 inner join users_email_registration on users.id = users_email_registration.user_id
-inner join user_profile on users.id = user_profile.user_id
+inner join users_profile on users.id = users_profile.user_id
 left join user_delete on users.id = user_delete.user_id
 where user_delete.id is null and users.id = $1
-order by users_email_registration.created_at desc, user_profile.created_at desc
+order by users_email_registration.created_at desc, users_profile.created_at desc
 limit 1`;
 
 export interface SelectUserArgs {
@@ -348,10 +348,10 @@ select
         limit 1
     ) as email,
     (
-        select user_profile.name
-        from user_profile
-        where user_profile.user_id = belong.user_id
-        order by user_profile.created_at desc
+        select users_profile.name
+        from users_profile
+        where users_profile.user_id = belong.user_id
+        order by users_profile.created_at desc
         limit 1
     ) as user_name
 from belong

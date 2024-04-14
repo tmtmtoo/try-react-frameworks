@@ -35,7 +35,7 @@ insert into users_email_registration values (
     '2024/1/1 12:00:00'
 );
 
-insert into user_profile values (
+insert into users_profile values (
     'af76e455-a84c-4384-ac37-b45a99003206',
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
     '_example',
