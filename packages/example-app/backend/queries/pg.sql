@@ -1,14 +1,14 @@
 -- name: SelectUser :one
 select
     users.id,
-    user_email_registration.email,
+    users_email_registration.email,
     user_profile.name
 from users
-inner join user_email_registration on users.id = user_email_registration.user_id
+inner join users_email_registration on users.id = users_email_registration.user_id
 inner join user_profile on users.id = user_profile.user_id
 left join user_delete on users.id = user_delete.user_id
 where user_delete.id is null and users.id = $1
-order by user_email_registration.created_at desc, user_profile.created_at desc
+order by users_email_registration.created_at desc, user_profile.created_at desc
 limit 1;
 
 -- name: SelectBelongingOrganizations :many
@@ -60,10 +60,10 @@ select
         limit 1
     ) as role_name,
     (
-        select user_email_registration.email
-        from user_email_registration
-        where user_email_registration.user_id = belong.user_id
-        order by user_email_registration.created_at desc
+        select users_email_registration.email
+        from users_email_registration
+        where users_email_registration.user_id = belong.user_id
+        order by users_email_registration.created_at desc
         limit 1
     ) as email,
     (

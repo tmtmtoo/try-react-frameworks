@@ -8,7 +8,7 @@ insert into users values (
     'a03b5bb4-661b-4725-80d7-c3a2d2ed1525'
 );
 
-insert into user_email_registration values (
+insert into users_email_registration values (
     'af76e455-a84c-4384-ac37-b45a99003207',
     '3ff76040-6363-449e-8bbc-4eae8ea3b3a7',
     '_example@example.com',

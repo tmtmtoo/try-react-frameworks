@@ -7,15 +7,15 @@ interface Client {
 export const selectLatestUserProfileByEmailQuery = `-- name: SelectLatestUserProfileByEmail :one
 select
     user_profile.user_id,
-    user_email_registration.email,
+    users_email_registration.email,
     user_profile.name
 from user_profile
-inner join user_email_registration on user_profile.user_id = user_email_registration.user_id
+inner join users_email_registration on user_profile.user_id = users_email_registration.user_id
 left join user_delete on user_profile.user_id = user_delete.user_id
 where
     user_delete.id is null
-    and user_email_registration.email = $1
-order by user_profile.created_at desc, user_email_registration.created_at desc
+    and users_email_registration.email = $1
+order by user_profile.created_at desc, users_email_registration.created_at desc
 limit 1`;
 
 export interface SelectLatestUserProfileByEmailArgs {
@@ -126,7 +126,7 @@ export async function insertUser(client: Client, args: InsertUserArgs): Promise<
 }
 
 export const insertUserEmailRegistrationQuery = `-- name: InsertUserEmailRegistration :exec
-insert into user_email_registration (id, user_id, email) values ($1, $2, $3)`;
+insert into users_email_registration (id, user_id, email) values ($1, $2, $3)`;
 
 export interface InsertUserEmailRegistrationArgs {
     id: string;
@@ -228,14 +228,14 @@ export async function insertAssign(client: Client, args: InsertAssignArgs): Prom
 export const selectUserQuery = `-- name: SelectUser :one
 select
     users.id,
-    user_email_registration.email,
+    users_email_registration.email,
     user_profile.name
 from users
-inner join user_email_registration on users.id = user_email_registration.user_id
+inner join users_email_registration on users.id = users_email_registration.user_id
 inner join user_profile on users.id = user_profile.user_id
 left join user_delete on users.id = user_delete.user_id
 where user_delete.id is null and users.id = $1
-order by user_email_registration.created_at desc, user_profile.created_at desc
+order by users_email_registration.created_at desc, user_profile.created_at desc
 limit 1`;
 
 export interface SelectUserArgs {
@@ -341,10 +341,10 @@ select
         limit 1
     ) as role_name,
     (
-        select user_email_registration.email
-        from user_email_registration
-        where user_email_registration.user_id = belong.user_id
-        order by user_email_registration.created_at desc
+        select users_email_registration.email
+        from users_email_registration
+        where users_email_registration.user_id = belong.user_id
+        order by users_email_registration.created_at desc
         limit 1
     ) as email,
     (
