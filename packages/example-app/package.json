@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "remix build",
-    "dev": "remix dev -c \"node ./server.mjs\"",
-    "dev2": "remix dev -c \"tsx ./server.ts\"",
+    "dev": "remix dev -c \"tsx ./server.ts\"",
     "start": "remix-serve ./build/index.js",
     "typecheck": "tsc",
     "test": "vitest"
