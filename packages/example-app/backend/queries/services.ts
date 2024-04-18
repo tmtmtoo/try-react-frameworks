@@ -104,28 +104,27 @@ export const factoryHomeQueryService =
         }
     };
 
-export type LastSwitchedOrganizationQueryInput = {
+export type LatestLoggedInOrganizationQueryInput = {
     userId: string;
 };
 
-export type LastSwitchedOrganization = {
-    lastSwitchedOrganizationId?: string;
-    firstBelongedOranizationId: string;
+export type LatestLoggedInOrganization = {
+    organizationId: string;
 };
 
-export type LastSwitchedOrganizationQueryResult = Result<
-    LastSwitchedOrganization,
+export type LatestLoggedInOrganizationQueryResult = Result<
+    LatestLoggedInOrganization,
     Error
 >;
 
-export type LastSwitchedOrganizationQueryService<Context> = Component<
-    LastSwitchedOrganizationQueryInput,
+export type LatestLoggedInOrganizationQueryService<Context> = Component<
+    LatestLoggedInOrganizationQueryInput,
     Context,
-    LastSwitchedOrganizationQueryResult
+    LatestLoggedInOrganizationQueryResult
 >;
 
-export const factoryLastSwitchedOrganizationQueryService =
-    <Context>(pool: Pool): LastSwitchedOrganizationQueryService<Context> =>
+export const factoryLatestLoggedInOrganizationQueryService =
+    <Context>(pool: Pool): LatestLoggedInOrganizationQueryService<Context> =>
     async ({ userId }) => {
         const client = await pool.connect();
 
@@ -140,13 +139,12 @@ export const factoryLastSwitchedOrganizationQueryService =
                 );
             }
 
+            const organizationId =
+                organization.lastSwitchedOrganizationId ??
+                organization.firstBelongedOrganizationId;
+
             return {
-                value: {
-                    lastSwitchedOrganizationId:
-                        organization.lastSwitchedOrganizationId?.toString(),
-                    firstBelongedOranizationId:
-                        organization.firstBelongedOrganizationId,
-                },
+                value: { organizationId },
             };
         } catch (e) {
             if (e instanceof Error) {
