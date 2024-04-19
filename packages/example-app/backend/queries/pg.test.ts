@@ -9,7 +9,7 @@ import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
     factoryHomeQueryService,
-    factoryLastSwitchedOrganizationQueryService,
+    factoryLatestLoggedInOrganizationQueryService,
 } from "./services";
 
 describe("when postgresql given fixtures", () => {
@@ -279,9 +279,9 @@ describe("when postgresql given fixtures", () => {
         });
     });
 
-    it("LastSwitchedOrganizationQueryService returns lastSwitchedOrganizationId and firstBelongedOranizationId", async () => {
+    it("LatestLoggedInOrganizationQueryService returns lastSwitchedOrganizationId", async () => {
         const queryService =
-            factoryLastSwitchedOrganizationQueryService(pgPool);
+            factoryLatestLoggedInOrganizationQueryService(pgPool);
         const swithedOrganization = await queryService(
             {
                 userId: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",
@@ -289,14 +289,13 @@ describe("when postgresql given fixtures", () => {
             null,
         );
         expect(swithedOrganization.value).toStrictEqual({
-            lastSwitchedOrganizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
-            firstBelongedOranizationId: "12664faf-373e-41f8-95b9-cb796afa3ae9",
-        });
+            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819"
+        })
     });
 
-    it("LastSwitchedOrganizationQueryService returns firstBelongedOranizationId", async () => {
+    it("LatestLoggedInOrganizationQueryService returns firstBelongedOranizationId", async () => {
         const queryService =
-            factoryLastSwitchedOrganizationQueryService(pgPool);
+            factoryLatestLoggedInOrganizationQueryService(pgPool);
         const swithedOrganization = await queryService(
             {
                 userId: "a03b5bb4-661b-4725-80d7-c3a2d2ed1525",
@@ -304,9 +303,8 @@ describe("when postgresql given fixtures", () => {
             null,
         );
         expect(swithedOrganization.value).toStrictEqual({
-            lastSwitchedOrganizationId: undefined,
-            firstBelongedOranizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
-        });
+            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819"
+        })
     });
 
     afterAll(async () => {
