@@ -8,6 +8,7 @@ import type {
     SessionStorage,
 } from "@remix-run/node";
 import { UserId } from "backend/commands/values";
+import { HomeQuerySerive, LatestLoggedInOrganizationQueryService } from "backend/queries/services";
 import { Authenticator } from "remix-auth";
 
 declare module "@remix-run/node" {
@@ -15,13 +16,14 @@ declare module "@remix-run/node" {
         context: {
             authenticator: Authenticator<UserId>;
             sessionStorage: SessionStorage<SessionData, SessionData>;
+            latestLoggedInOrganizationQueryService: LatestLoggedInOrganizationQueryService<null>;
+            homeQueryService: HomeQuerySerive<null>;
         };
     }
 
     export interface ActionFunctionArgs extends DataFunctionArgs {
         context: {
             authenticator: Authenticator<UserId>;
-            sessionStorage: SessionStorage<SessionData, SessionData>;
         };
     }
 }

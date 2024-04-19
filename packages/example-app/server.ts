@@ -9,6 +9,10 @@ import { factoryLoginOrSignupUseCase } from "backend/commands/usecases";
 import express from "express";
 import pg from "pg";
 import * as build from "./build/index.js";
+import {
+    factoryHomeQueryService,
+    factoryLatestLoggedInOrganizationQueryService,
+} from "backend/queries/services.js";
 
 const config = parseConfig({
     databaseUrl: process.env.DATABASE_URL,
@@ -23,6 +27,11 @@ const findUser = factoryFindUser(pgPool);
 const persistUser = factoryPersitUser(pgPool);
 
 const loginOrSignup = factoryLoginOrSignupUseCase(findUser, persistUser);
+
+const latestLoggedInOrganizationQueryService =
+    factoryLatestLoggedInOrganizationQueryService<null>(pgPool);
+
+const homeQueryService = factoryHomeQueryService<null>(pgPool);
 
 const { authenticator, sessionStorage } = factoryAuth(
     loginOrSignup,
@@ -42,7 +51,12 @@ app.all(
         build,
         mode: config.nodeEnv,
         getLoadContext() {
-            return { authenticator, sessionStorage };
+            return {
+                authenticator,
+                sessionStorage,
+                latestLoggedInOrganizationQueryService,
+                homeQueryService,
+            };
         },
     }),
 );
