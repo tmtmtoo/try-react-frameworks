@@ -7,11 +7,11 @@ plugins:
 sql:
   - engine: postgresql
     queries:
-      - packages/remix-app/backend/commands/infrastructures/pg.sql
-      - packages/remix-app/backend/queries/pg.sql
+      - packages/backend/src/commands/infrastructures/pg.sql
+      - packages/backend/src/queries/pg.sql
     schema: schema.sql
     codegen:
-      - out: packages/remix-app/backend/gen
+      - out: packages/backend/src
         plugin: ts
         options:
           runtime: node

@@ -2,7 +2,8 @@
     "name": "backend",
     "type": "module",
     "scripts": {
-        "typecheck": "tsc"
+        "typecheck": "tsc",
+        "test": "vitest"
     },
     "dependencies": {
         "uuidv7": "^0.6.3",
@@ -12,6 +13,7 @@
         "esbuild": "^0.20.2",
         "@types/pg": "^8.11.5",
         "testcontainers": "^10.8.2",
+        "pg": "^8.11.5",
         "typescript": "^5.4.5",
         "vitest": "^1.5.0"
     }
