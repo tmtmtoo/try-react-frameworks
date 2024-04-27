@@ -10,21 +10,21 @@ import {
     insertUserProfile,
     selectBelongingOrganizationByUserId,
     selectLatestUserProfileByEmail,
-} from "../../gen/queries_sql";
-import { User } from "../entities";
+} from "../../pg_sql";
+import { User } from "../../commands/entities";
 import {
     DataConsistencyError,
     FindUser,
     IoError,
     PersistUser,
-} from "../repositories";
+} from "../../commands/repositories";
 import {
     parseDisplayName,
     parseEmail,
     parseOrganizationId,
     parseRole,
     parseUserId,
-} from "../values";
+} from "../../commands/values";
 
 const tx = async <T>(
     pool: Pool,

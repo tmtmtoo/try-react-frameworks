@@ -3,8 +3,8 @@ import {
     selectOrganizationUsers,
     selectSwitchedOrganization,
     selectUser,
-} from "backend/gen/pg_sql";
-import { Component, Result } from "backend/types";
+} from "../pg_sql";
+import { Component, Result } from "../types";
 import { Pool } from "pg";
 
 export type HomeQueryInput = {

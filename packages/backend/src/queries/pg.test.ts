@@ -2,7 +2,7 @@ import {
     selectBelongingOrganizations,
     selectOrganizationUsers,
     selectUser,
-} from "backend/gen/pg_sql";
+} from "../pg_sql";
 import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
     factoryHomeQueryService,
     factoryLatestLoggedInOrganizationQueryService,
-} from "./services";
+} from "../queries/services";
 
 describe("when postgresql given fixtures", () => {
     let pgContainer: StartedTestContainer;

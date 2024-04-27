@@ -1,13 +1,13 @@
 import { Component, Result } from "../types";
-import { createUserWithDefaultOrganization } from "./entities";
-import { FindUser, PersistUser } from "./repositories";
+import { createUserWithDefaultOrganization } from "../commands/entities";
+import { FindUser, PersistUser } from "../commands/repositories";
 import {
     DisplayName,
     Email,
     UserId,
     parseDisplayName,
     parseEmail,
-} from "./values";
+} from "../commands/values";
 
 export class RepositoryError extends Error {
     // biome-ignore lint: <any>

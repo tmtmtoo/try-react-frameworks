@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { DataConsistencyError, IoError } from "./repositories";
+import { DataConsistencyError, IoError } from "../commands/repositories";
 import {
     LoginOrSignupCommand,
     RepositoryError,
     UnknownError,
     factoryLoginOrSignupUseCase,
     parseLoginOrSignupCommand,
-} from "./usecases";
-import { DisplayName, Email, OrganizationId, Role, UserId } from "./values";
+} from "../commands/usecases";
+import { DisplayName, Email, OrganizationId, Role, UserId } from "../commands/values";
 
 describe("when parse loginOrSignupCommand", () => {
     it("fails if given invalid email", () => {

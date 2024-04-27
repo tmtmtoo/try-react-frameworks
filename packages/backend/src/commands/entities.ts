@@ -8,7 +8,7 @@ import {
     parseDisplayName,
     parseOrganizationId,
     parseUserId,
-} from "./values";
+} from "../commands/values";
 
 export type User = {
     id: UserId;

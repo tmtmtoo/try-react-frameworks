@@ -1,6 +1,6 @@
 import { Component, Result } from "../types";
-import { User } from "./entities";
-import { Email, UserId } from "./values";
+import { User } from "../commands/entities";
+import { Email, UserId } from "../commands/values";
 
 export class IoError extends Error {
     // biome-ignore lint: <any>

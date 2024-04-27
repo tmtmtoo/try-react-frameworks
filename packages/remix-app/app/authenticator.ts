@@ -1,9 +1,6 @@
 import { createCookieSessionStorage } from "@remix-run/node";
-import {
-    LoginOrSignupUseCase,
-    parseLoginOrSignupCommand,
-} from "backend/commands/usecases";
-import { UserId } from "backend/commands/values";
+import { LoginOrSignupUseCase, parseLoginOrSignupCommand } from "@backend/commands/usecases";
+import { UserId } from "@backend/commands/values";
 import { Authenticator, AuthorizationError } from "remix-auth";
 import { FormStrategy } from "remix-auth-form";
 

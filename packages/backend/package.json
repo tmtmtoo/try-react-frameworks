@@ -1,16 +1,18 @@
 {
     "name": "backend",
     "type": "module",
-    "main": "dist/index.mjs",
-    "types": "dist/index.d.ts",
     "scripts": {
-        "typecheck": "tsc",
-        "build:esbuild": "node build.js",
-        "build:types": "tsc --declaration --emitDeclarationOnly --declarationDir './dist'",
-        "build": "pnpm build:types && pnpm build:esbuild"
+        "typecheck": "tsc"
+    },
+    "dependencies": {
+        "uuidv7": "^0.6.3",
+        "valibot": "^0.30.0"
     },
     "devDependencies": {
         "esbuild": "^0.20.2",
-        "typescript": "^5.4.5"
+        "@types/pg": "^8.11.5",
+        "testcontainers": "^10.8.2",
+        "typescript": "^5.4.5",
+        "vitest": "^1.5.0"
     }
 }

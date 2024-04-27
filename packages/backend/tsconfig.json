@@ -13,9 +13,7 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "baseUrl": ".",
-        "paths": {
-            "@/*": ["./src/*"]
-        },
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "declaration": true
     }
 }

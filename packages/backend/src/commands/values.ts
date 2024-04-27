@@ -1,4 +1,4 @@
-import { Result } from "backend/types";
+import { Result } from "../types";
 import * as v from "valibot";
 
 type Typed<Value, Tag> = Value & { tag: Tag };
