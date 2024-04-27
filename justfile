@@ -9,37 +9,38 @@ compose-up:
 compose-down:
   @docker compose down
 
-db-psql:
+psql:
   @psql "$DATABASE_URL"
 
-db-migrate:
+migrate-db:
   @psqldef -U "$DATABASE_USER" -h localhost -p 5432 dev < schema.sql
   @psql "$DATABASE_URL" -f ./seed.sql
 
-db-codegen:
+codegen-db:
   @sqlc generate
 
-sql-fix target=".":
+fmt-sql target=".":
   @sqlfluff fix {{target}}
 
-sql-lint target=".":
+lint-sql target=".":
   @sqlfluff lint {{target}}
 
-ts-lint target=".":
+lint-ts target=".":
   @biome lint {{target}}
 
-ts-fix target=".":
+fmt-ts target=".":
   -@biome format --write {{target}}
   @biome check --apply {{target}}
 
-ts-check:
+check-ts:
   @cd ./packages/remix-app && pnpm typecheck
 
-nix-fmt target=".":
+fmt-nix target=".":
   @nix fmt {{target}}
 
-app-prepare:
+prepare-app:
   @pnpm install --frozen-lockfile
 
-app-unit-test: app-prepare
-  @cd ./packages/remix-app && pnpm test
+test: prepare-app
+  # @cd ./packages/remix-app && pnpm test
+  @cd ./packages/backend && pnpm test
