@@ -1,0 +1,21 @@
+{
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "dist"],
+    "compilerOptions": {
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "moduleResolution": "Bundler",
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "strict": true,
+        "allowJs": false,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "outDir": "./dist"
+    }
+}

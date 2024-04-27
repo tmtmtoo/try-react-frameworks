@@ -1,0 +1,16 @@
+{
+    "name": "backend",
+    "type": "module",
+    "main": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "typecheck": "tsc",
+        "build:esbuild": "node build.js",
+        "build:types": "tsc --declaration --emitDeclarationOnly --declarationDir './dist'",
+        "build": "pnpm build:types && pnpm build:esbuild"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.2",
+        "typescript": "^5.4.5"
+    }
+}

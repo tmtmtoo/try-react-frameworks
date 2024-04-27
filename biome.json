@@ -5,14 +5,22 @@
     },
     "linter": {
         "enabled": true,
-        "ignore": ["packages/example-app/public", "packages/example-app/build"],
+        "ignore": [
+            "packages/example-app/public",
+            "packages/example-app/build",
+            "packages/backend/dist"
+        ],
         "rules": {
             "recommended": true
         }
     },
     "formatter": {
         "enabled": true,
-        "ignore": ["packages/example-app/public", "packages/example-app/build"],
+        "ignore": [
+            "packages/example-app/public",
+            "packages/example-app/build",
+            "packages/backend/dist"
+        ],
         "indentStyle": "space",
         "indentWidth": 4
     }
