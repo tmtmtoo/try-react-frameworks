@@ -7,7 +7,13 @@ import {
     factoryLoginOrSignupUseCase,
     parseLoginOrSignupCommand,
 } from "../commands/usecases";
-import { DisplayName, Email, OrganizationId, Role, UserId } from "../commands/values";
+import {
+    DisplayName,
+    Email,
+    OrganizationId,
+    Role,
+    UserId,
+} from "../commands/values";
 
 describe("when parse loginOrSignupCommand", () => {
     it("fails if given invalid email", () => {

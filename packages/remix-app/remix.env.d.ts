@@ -8,7 +8,10 @@ import type {
     SessionStorage,
 } from "@remix-run/node";
 import { UserId } from "backend/commands/values";
-import { HomeQuerySerive, LatestLoggedInOrganizationQueryService } from "backend/queries/services";
+import {
+    HomeQuerySerive,
+    LatestLoggedInOrganizationQueryService,
+} from "backend/queries/services";
 import { Authenticator } from "remix-auth";
 
 declare module "@remix-run/node" {

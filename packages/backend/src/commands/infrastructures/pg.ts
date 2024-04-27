@@ -1,16 +1,5 @@
 import { Pool, PoolClient } from "pg";
 import { uuidv7 } from "uuidv7";
-import {
-    insertAssign,
-    insertBelong,
-    insertOrgaization,
-    insertOrganizationProfile,
-    insertUser,
-    insertUserEmailRegistration,
-    insertUserProfile,
-    selectBelongingOrganizationByUserId,
-    selectLatestUserProfileByEmail,
-} from "../../pg_sql";
 import { User } from "../../commands/entities";
 import {
     DataConsistencyError,
@@ -25,6 +14,17 @@ import {
     parseRole,
     parseUserId,
 } from "../../commands/values";
+import {
+    insertAssign,
+    insertBelong,
+    insertOrgaization,
+    insertOrganizationProfile,
+    insertUser,
+    insertUserEmailRegistration,
+    insertUserProfile,
+    selectBelongingOrganizationByUserId,
+    selectLatestUserProfileByEmail,
+} from "../../pg_sql";
 
 const tx = async <T>(
     pool: Pool,

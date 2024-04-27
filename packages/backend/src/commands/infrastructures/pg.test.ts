@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { selectBelongingOrganizationByUserId } from "../../pg_sql";
 import { Pool } from "pg";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { IoError } from "../../commands/repositories";
+import { selectBelongingOrganizationByUserId } from "../../pg_sql";
 import {
     DisplayName,
     Email,
@@ -29,7 +29,7 @@ describe("when postgresql given fixtures", () => {
                 .withEnvironment({
                     POSTGRES_USER: "dev",
                     POSTGRES_HOST_AUTH_METHOD: "trust",
-                    PGPORT: "5434"
+                    PGPORT: "5434",
                 })
                 .withWaitStrategy(Wait.forListeningPorts())
                 .start();

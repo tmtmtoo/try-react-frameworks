@@ -1,3 +1,4 @@
+import { Pool } from "pg";
 import {
     selectBelongingOrganizations,
     selectOrganizationUsers,
@@ -5,7 +6,6 @@ import {
     selectUser,
 } from "../pg_sql";
 import { Component, Result } from "../types";
-import { Pool } from "pg";
 
 export type HomeQueryInput = {
     userId: string;

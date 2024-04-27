@@ -1,12 +1,12 @@
+import { readFile } from "node:fs/promises";
+import { Pool } from "pg";
+import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
     selectBelongingOrganizations,
     selectOrganizationUsers,
     selectUser,
 } from "../pg_sql";
-import { readFile } from "node:fs/promises";
-import { Pool } from "pg";
-import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
     factoryHomeQueryService,
     factoryLatestLoggedInOrganizationQueryService,
@@ -289,8 +289,8 @@ describe("when postgresql given fixtures", () => {
             null,
         );
         expect(swithedOrganization.value).toStrictEqual({
-            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819"
-        })
+            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+        });
     });
 
     it("LatestLoggedInOrganizationQueryService returns firstBelongedOranizationId", async () => {
@@ -303,8 +303,8 @@ describe("when postgresql given fixtures", () => {
             null,
         );
         expect(swithedOrganization.value).toStrictEqual({
-            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819"
-        })
+            organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
+        });
     });
 
     afterAll(async () => {

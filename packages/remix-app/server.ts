@@ -1,18 +1,18 @@
+import {
+    factoryFindUser,
+    factoryPersitUser,
+} from "@backend/commands/infrastructures/pg";
+import { factoryLoginOrSignupUseCase } from "@backend/commands/usecases";
+import {
+    factoryHomeQueryService,
+    factoryLatestLoggedInOrganizationQueryService,
+} from "@backend/queries/services";
 import { createRequestHandler } from "@remix-run/express";
 import { parseConfig } from "app.config";
 import { factoryAuth } from "app/authenticator";
 import express from "express";
 import pg from "pg";
 import * as build from "./build/index.js";
-import {
-    factoryFindUser,
-    factoryPersitUser,
-} from "@backend/commands/infrastructures/pg";
-import { factoryLoginOrSignupUseCase } from "@backend/commands/usecases"
-import {
-    factoryLatestLoggedInOrganizationQueryService,
-    factoryHomeQueryService,
-} from "@backend/queries/services";
 
 const config = parseConfig({
     databaseUrl: process.env.DATABASE_URL,
