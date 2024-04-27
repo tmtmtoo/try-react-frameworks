@@ -33,7 +33,7 @@ ts-fix target=".":
   @biome check --apply {{target}}
 
 ts-check:
-  @cd ./packages/example-app && pnpm typecheck
+  @cd ./packages/remix-app && pnpm typecheck
 
 nix-fmt target=".":
   @nix fmt {{target}}
@@ -42,4 +42,4 @@ app-prepare:
   @pnpm install --frozen-lockfile
 
 app-unit-test: app-prepare
-  @cd ./packages/example-app && pnpm test
+  @cd ./packages/remix-app && pnpm test

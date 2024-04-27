@@ -6,8 +6,8 @@
     "linter": {
         "enabled": true,
         "ignore": [
-            "packages/example-app/public",
-            "packages/example-app/build",
+            "packages/remix-app/public",
+            "packages/remix-app/build",
             "packages/backend/dist"
         ],
         "rules": {
@@ -17,8 +17,8 @@
     "formatter": {
         "enabled": true,
         "ignore": [
-            "packages/example-app/public",
-            "packages/example-app/build",
+            "packages/remix-app/public",
+            "packages/remix-app/build",
             "packages/backend/dist"
         ],
         "indentStyle": "space",
