@@ -79,13 +79,13 @@ describe("when postgresql given fixtures", () => {
                     id: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
                     displayName: "Foobar Organization",
                     role: "member",
-                    authorityExample: false,
+                    authorityManageOrganization: false,
                 },
                 {
                     id: "12664faf-373e-41f8-95b9-cb796afa3ae9",
                     displayName: "Example Organization",
                     role: "admin",
-                    authorityExample: true,
+                    authorityManageOrganization: true,
                 },
             ],
         });
@@ -174,13 +174,13 @@ describe("when postgresql given fixtures", () => {
                     organizationId: "018eaef3-73ea-75a1-88da-518d611230bb",
                     organizationName: "UltraHyper",
                     roleName: "admin",
-                    authorityExample: true,
+                    authorityManageOrganization: true,
                 },
                 {
                     organizationId: "018eaef4-287b-724b-aeb6-cd2cc7179d4e",
                     organizationName: "Yay",
                     roleName: "member",
-                    authorityExample: false,
+                    authorityManageOrganization: false,
                 },
             ]);
         } finally {

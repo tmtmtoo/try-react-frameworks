@@ -113,13 +113,13 @@ describe("when postgresql given fixtures", () => {
                     organizationId: "12664faf-373e-41f8-95b9-cb796afa3ae9",
                     organizationName: "Example Organization",
                     roleName: "admin",
-                    authorityExample: true,
+                    authorityManageOrganization: true,
                 },
                 {
                     organizationId: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
                     organizationName: "Foobar Organization",
                     roleName: "member",
-                    authorityExample: false,
+                    authorityManageOrganization: false,
                 },
             ]);
         } finally {
@@ -259,7 +259,7 @@ describe("when postgresql given fixtures", () => {
                     id: "e1db2424-1fb4-4cc2-9233-c430f1a49819",
                     name: "Foobar Organization",
                     role: "member",
-                    authorityExample: false,
+                    authorityManageOrganization: false,
                     users: [
                         {
                             id: "3ff76040-6363-449e-8bbc-4eae8ea3b3a7",

@@ -33,7 +33,7 @@ select distinct on (assign.belong_id)
     latest_organizations_profiles.organization_id as organization_id,
     latest_organizations_profiles.name as organization_name,
     roles.name as role_name,
-    roles.example as authority_example
+    roles.manage_organization as authority_manage_organization
 from belong
 inner join
     latest_organizations_profiles

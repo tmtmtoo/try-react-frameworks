@@ -24,7 +24,7 @@ export type Home = {
         id: string;
         name: string;
         role: string;
-        authorityExample: boolean;
+        authorityManageOrganization: boolean;
         users: {
             id: string;
             email: string;
@@ -81,7 +81,7 @@ export const factoryHomeQueryService =
                     id: selectedOrganization.organizationId,
                     name: selectedOrganization.organizationName,
                     role: selectedOrganization.roleName,
-                    authorityExample: selectedOrganization.authorityExample,
+                    authorityManageOrganization: selectedOrganization.authorityManageOrganization,
                     users: organizationUsers.map((user) => ({
                         id: user.userId,
                         name: user.userName?.toString(),

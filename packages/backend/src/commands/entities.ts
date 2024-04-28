@@ -18,7 +18,7 @@ export type User = {
         id: OrganizationId;
         displayName: DisplayName;
         role: Role;
-        authorityExample?: boolean;
+        authorityManageOrganization?: boolean;
     }[];
 };
 

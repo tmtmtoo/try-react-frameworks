@@ -53,7 +53,7 @@ const intoUserMayException = (from: {
         id: string;
         name: string;
         role: string;
-        authorityExample: boolean;
+        authorityManageOrganization: boolean;
     }[];
 }): User => {
     const userId = parseUserId(from.id);
@@ -72,11 +72,11 @@ const intoUserMayException = (from: {
         const organizationId = parseOrganizationId(organization.id);
         const organizationName = parseDisplayName(organization.name);
         const role = parseRole(organization.role);
-        const authorityExample = organization.authorityExample;
+        const authorityManageOrganization = organization.authorityManageOrganization;
 
         if (organizationId.error || organizationName.error || role.error) {
             throw new DataConsistencyError(
-                `invalid belongings: organization_id: ${organization.id}, organization_name: ${organization.name}, role: ${organization.role}, authority_example: ${organization.authorityExample}`,
+                `invalid belongings: organization_id: ${organization.id}, organization_name: ${organization.name}, role: ${organization.role}, authority_manage_organization: ${organization.authorityManageOrganization}`,
             );
         }
 
@@ -84,7 +84,7 @@ const intoUserMayException = (from: {
             id: organizationId.value,
             displayName: organizationName.value,
             role: role.value,
-            authorityExample,
+            authorityManageOrganization,
         });
     }
 
@@ -123,7 +123,7 @@ export const factoryFindUser =
                     id: org.organizationId,
                     name: org.organizationName,
                     role: org.roleName,
-                    authorityExample: org.authorityExample,
+                    authorityManageOrganization: org.authorityManageOrganization,
                 })),
             });
 

@@ -51,7 +51,7 @@ describe("when execute loginOrSignupUseCase", () => {
                     id: "018e8e8f-b0a2-7d42-b023-d3e38bd5529f" as OrganizationId,
                     displayName: "bbb" as DisplayName,
                     role: "admin" as Role,
-                    authorityExample: true,
+                    authorityManageOrganization: true,
                 },
             ],
         };
@@ -73,7 +73,7 @@ describe("when execute loginOrSignupUseCase", () => {
                     id: "018e8e8f-b0a2-7d42-b023-d3e38bd5529f" as OrganizationId,
                     displayName: "bbb" as DisplayName,
                     role: "admin" as Role,
-                    authorityExample: true,
+                    authorityManageOrganization: true,
                 },
             ],
         };

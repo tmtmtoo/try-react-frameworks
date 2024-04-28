@@ -30,7 +30,7 @@ select
         limit 1
     ),
     (
-        select roles.example as authority_example
+        select roles.manage_organization as authority_manage_organization
         from assign
         inner join roles on assign.role_name = roles.name
         where assign.belong_id = belong.id
