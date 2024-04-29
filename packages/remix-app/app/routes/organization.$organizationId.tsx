@@ -6,7 +6,7 @@ import {
     redirect,
 } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { type Home } from "backend/queries/services";
+import { type Home } from "@backend/queries/services";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
     await context.authenticator.logout(request, { redirectTo: "/login" });
@@ -46,34 +46,32 @@ export default function OrganizationHome() {
 
     const content = home ? (
         <>
-            <label>id: {home.id}</label>
-            <br />
-            <label>email: {home.email}</label>
-            <br />
-            <label>name: {home.name}</label>
-            <br />
-            <label>organization id: {home.selectedOrganization.id}</label>
-            <br />
-            <label>organization name: {home.selectedOrganization.name}</label>
-            <br />
-            <label>role: {home.selectedOrganization.role}</label>
-            <br />
-            <label>
-                authority:{" "}
-                {home.selectedOrganization.authorityExample ? "👍" : "🙅"}
-            </label>
-            <br />
+            <p>id: {home.id}</p>
+            <p>email: {home.email}</p>
+            <p>name: {home.name}</p>
+            <p>
+                selected organization: {home.selectedOrganization.name} (
+                {home.selectedOrganization.id})
+            </p>
+            <p>role: {home.selectedOrganization.role}</p>
+            <p>
+                authorityManageOrganization:{" "}
+                {home.selectedOrganization.authorityManageOrganization
+                    ? "👍"
+                    : "🙅"}
+            </p>
             {home.belongingOrganizations.map((org, i) => {
                 return (
                     <div key={i.toString()}>
-                        <label>yay: {org.id}</label>
-                        <br />
+                        <p>
+                            belonged organization: {org.name} ({org.id})
+                        </p>
                     </div>
                 );
             })}
         </>
     ) : (
-        <label>{error}</label>
+        <p>{error}</p>
     );
 
     return (
