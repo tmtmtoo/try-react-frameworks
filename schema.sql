@@ -101,3 +101,31 @@ create table organizations_switch (
         organization_id
     ) references organizations (id)
 );
+
+create table organizations_invitation (
+    id uuid primary key,
+    organization_id uuid not null,
+    invitee_user_id uuid not null,
+    inviter_user_id uuid not null,
+    created_at timestamp not null default current_timestamp,
+
+    constraint fk_organizations_invitation_organization foreign key (
+        organization_id
+    ) references organizations (id),
+    constraint fk_organizations_invitation_invitee_user foreign key (
+        invitee_user_id
+    ) references users (id),
+    constraint fk_organizations_invitation_inviter_user foreign key (
+        inviter_user_id
+    ) references users (id)
+);
+
+create table organizations_invitation_cancel (
+    id uuid primary key,
+    organizations_invitation_id uuid not null,
+    created_at timestamp not null default current_timestamp,
+
+    constraint fk_organizations_invitation_cancel_organizations_invitation foreign key (
+        organizations_invitation_id
+    ) references organizations_invitation (id)
+);
