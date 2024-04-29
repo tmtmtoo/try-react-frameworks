@@ -59,14 +59,12 @@ create table belong (
     id uuid primary key,
     user_id uuid not null,
     organization_id uuid not null,
-    inviter_user_id uuid,
     created_at timestamp not null default current_timestamp,
 
     constraint fk_belong_user foreign key (user_id) references users (id),
     constraint fk_belong_organization foreign key (
         organization_id
-    ) references organizations (id),
-    constraint fk_belong_inviter_user foreign key (inviter_user_id) references users (id)
+    ) references organizations (id)
 );
 
 create table belong_dismiss (
