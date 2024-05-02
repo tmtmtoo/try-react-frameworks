@@ -1,9 +1,7 @@
-import { User } from "../commands/entities";
-import { Email, UserId } from "../commands/values";
+import { Email } from "../commands/values";
 import { Component, Result } from "../types";
 
 export class IoError extends Error {
-    // biome-ignore lint: <any>
     constructor(...args: any) {
         super(args);
         this.name = this.constructor.name;
@@ -11,21 +9,20 @@ export class IoError extends Error {
 }
 
 export class DataConsistencyError extends Error {
-    // biome-ignore lint: <any>
     constructor(...args: any) {
         super(args);
         this.name = this.constructor.name;
     }
 }
 
-export type FindUser<Context> = Component<
-    Email,
+export type Find<T, K, Context> = Component<
+    K,
     Context,
-    Result<User | null, IoError | DataConsistencyError | Error>
+    Result<T | null, IoError | DataConsistencyError | Error>
 >;
 
-export type PersistUser<Context> = Component<
-    User,
+export type Persist<T extends { id: any }, Context> = Component<
+    T,
     Context,
-    Result<UserId, IoError | Error>
+    Result<T["id"], IoError | Error>
 >;

@@ -11,7 +11,10 @@
             "packages/backend/dist"
         ],
         "rules": {
-            "recommended": true
+            "recommended": true,
+            "suspicious": {
+                "noExplicitAny": "off"
+            }
         }
     },
     "formatter": {

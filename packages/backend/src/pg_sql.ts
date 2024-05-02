@@ -45,6 +45,48 @@ export async function selectLatestUserProfileByEmail(client: Client, args: Selec
     };
 }
 
+export const selectLatestUserProfileByIdQuery = `-- name: SelectLatestUserProfileById :one
+select
+    users.id as user_id,
+    users_email_registration.email,
+    users_profile.name
+from users
+inner join users_email_registration on users.id = users_email_registration.user_id
+inner join users_profile on users.id = users_profile.user_id
+left join users_delete on users.id = users_delete.user_id
+where
+    users_delete.id is null
+    and users.id = $1
+order by users_email_registration.created_at desc, users_profile.created_at desc
+limit 1`;
+
+export interface SelectLatestUserProfileByIdArgs {
+    id: string;
+}
+
+export interface SelectLatestUserProfileByIdRow {
+    userId: string;
+    email: string;
+    name: string | null;
+}
+
+export async function selectLatestUserProfileById(client: Client, args: SelectLatestUserProfileByIdArgs): Promise<SelectLatestUserProfileByIdRow | null> {
+    const result = await client.query({
+        text: selectLatestUserProfileByIdQuery,
+        values: [args.id],
+        rowMode: "array"
+    });
+    if (result.rows.length !== 1) {
+        return null;
+    }
+    const row = result.rows[0];
+    return {
+        userId: row[0],
+        email: row[1],
+        name: row[2]
+    };
+}
+
 export const selectBelongingOrganizationByUserIdQuery = `-- name: SelectBelongingOrganizationByUserId :many
 with latest as (
     select
@@ -108,6 +150,44 @@ export async function selectBelongingOrganizationByUserId(client: Client, args: 
             authorityManageOrganization: row[3]
         };
     });
+}
+
+export const selectLatestOraganizationProfileByIdQuery = `-- name: SelectLatestOraganizationProfileById :one
+select
+    organizations.id as organization_id,
+    organizations_profile.name
+from organizations
+inner join organizations_profile on organizations.id = organizations_profile.organization_id
+left join organizations_delete on organizations.id = organizations_delete.organization_id
+where
+    organizations_delete.id is null
+    and organizations.id = $1
+order by organizations_profile.created_at desc
+limit 1`;
+
+export interface SelectLatestOraganizationProfileByIdArgs {
+    id: string;
+}
+
+export interface SelectLatestOraganizationProfileByIdRow {
+    organizationId: string;
+    name: string;
+}
+
+export async function selectLatestOraganizationProfileById(client: Client, args: SelectLatestOraganizationProfileByIdArgs): Promise<SelectLatestOraganizationProfileByIdRow | null> {
+    const result = await client.query({
+        text: selectLatestOraganizationProfileByIdQuery,
+        values: [args.id],
+        rowMode: "array"
+    });
+    if (result.rows.length !== 1) {
+        return null;
+    }
+    const row = result.rows[0];
+    return {
+        organizationId: row[0],
+        name: row[1]
+    };
 }
 
 export const insertUserQuery = `-- name: InsertUser :exec
@@ -221,6 +301,27 @@ export async function insertAssign(client: Client, args: InsertAssignArgs): Prom
     await client.query({
         text: insertAssignQuery,
         values: [args.id, args.roleName, args.belongId],
+        rowMode: "array"
+    });
+}
+
+export const insertOrganizationInvitationQuery = `-- name: InsertOrganizationInvitation :exec
+insert into organizations_invitation (
+    id, organization_id, role_name, invitee_user_email, inviter_user_id
+) values ($1, $2, $3, $4, $5)`;
+
+export interface InsertOrganizationInvitationArgs {
+    id: string;
+    organizationId: string;
+    roleName: string;
+    inviteeUserEmail: string;
+    inviterUserId: string;
+}
+
+export async function insertOrganizationInvitation(client: Client, args: InsertOrganizationInvitationArgs): Promise<void> {
+    await client.query({
+        text: insertOrganizationInvitationQuery,
+        values: [args.id, args.organizationId, args.roleName, args.inviteeUserEmail, args.inviterUserId],
         rowMode: "array"
     });
 }

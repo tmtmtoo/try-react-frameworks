@@ -105,20 +105,22 @@ create table organizations_switch (
 create table organizations_invitation (
     id uuid primary key,
     organization_id uuid not null,
-    invitee_user_id uuid not null,
+    role_name text not null,
+    invitee_user_email text not null,
     inviter_user_id uuid not null,
     created_at timestamp not null default current_timestamp,
 
     constraint fk_organizations_invitation_organization foreign key (
         organization_id
     ) references organizations (id),
-    constraint fk_organizations_invitation_invitee_user foreign key (
-        invitee_user_id
-    ) references users (id),
+    constraint fk_organizations_invitation_role foreign key (role_name) references roles (name),
     constraint fk_organizations_invitation_inviter_user foreign key (
         inviter_user_id
     ) references users (id)
 );
+
+create index idx_organization_invitation_invitee_user_emaila
+on organizations_invitation using btree (invitee_user_email);
 
 create table organizations_invitation_cancel (
     id uuid primary key,

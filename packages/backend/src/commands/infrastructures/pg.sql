@@ -12,6 +12,21 @@ where
 order by users_profile.created_at desc, users_email_registration.created_at desc
 limit 1;
 
+-- name: SelectLatestUserProfileById :one
+select
+    users.id as user_id,
+    users_email_registration.email,
+    users_profile.name
+from users
+inner join users_email_registration on users.id = users_email_registration.user_id
+inner join users_profile on users.id = users_profile.user_id
+left join users_delete on users.id = users_delete.user_id
+where
+    users_delete.id is null
+    and users.id = $1
+order by users_email_registration.created_at desc, users_profile.created_at desc
+limit 1;
+
 -- name: SelectBelongingOrganizationByUserId :many
 with latest as (
     select
@@ -50,6 +65,19 @@ where
     )
 order by assign.belong_id asc, assign.created_at desc, belong.created_at asc;
 
+-- name: SelectLatestOraganizationProfileById :one
+select
+    organizations.id as organization_id,
+    organizations_profile.name
+from organizations
+inner join organizations_profile on organizations.id = organizations_profile.organization_id
+left join organizations_delete on organizations.id = organizations_delete.organization_id
+where
+    organizations_delete.id is null
+    and organizations.id = $1
+order by organizations_profile.created_at desc
+limit 1;
+
 -- name: InsertUser :exec
 insert into users (id) values ($1);
 
@@ -70,3 +98,8 @@ insert into belong (id, user_id, organization_id) values ($1, $2, $3);
 
 -- name: InsertAssign :exec
 insert into assign (id, role_name, belong_id) values ($1, $2, $3);
+
+-- name: InsertOrganizationInvitation :exec
+insert into organizations_invitation (
+    id, organization_id, role_name, invitee_user_email, inviter_user_id
+) values ($1, $2, $3, $4, $5);

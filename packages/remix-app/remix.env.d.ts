@@ -11,7 +11,8 @@ import { UserId } from "backend/commands/values";
 import {
     HomeQuerySerive,
     LatestLoggedInOrganizationQueryService,
-} from "backend/queries/services";
+} from "@backend/queries/services";
+import { InviteUserUseCase } from "@backend/commands/usecases";
 import { Authenticator } from "remix-auth";
 
 declare module "@remix-run/node" {
@@ -27,6 +28,7 @@ declare module "@remix-run/node" {
     export interface ActionFunctionArgs extends DataFunctionArgs {
         context: {
             authenticator: Authenticator<UserId>;
+            inviteUser: InviteUserUseCase<null>;
         };
     }
 }

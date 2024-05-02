@@ -1,8 +1,14 @@
 import {
-    factoryFindUser,
+    factoryFindOrganizationById,
+    factoryFindUserByEmail,
+    factoryFindUserById,
+    factoryPersistOrganizationWithUserInvitation,
     factoryPersitUser,
 } from "@backend/commands/infrastructures/pg";
-import { factoryLoginOrSignupUseCase } from "@backend/commands/usecases";
+import {
+    factoryInviteUserUseCase,
+    factoryLoginOrSignupUseCase,
+} from "@backend/commands/usecases";
 import {
     factoryHomeQueryService,
     factoryLatestLoggedInOrganizationQueryService,
@@ -22,11 +28,25 @@ const config = parseConfig({
 
 const pgPool = new pg.Pool({ connectionString: config.databaseUrl });
 
-const findUser = factoryFindUser(pgPool);
+const findUserByEmail = factoryFindUserByEmail(pgPool);
+
+const findUserById = factoryFindUserById(pgPool);
+
+const findOranizationById = factoryFindOrganizationById(pgPool);
 
 const persistUser = factoryPersitUser(pgPool);
 
-const loginOrSignup = factoryLoginOrSignupUseCase(findUser, persistUser);
+const persistOrganizationWithUserInvitation =
+    factoryPersistOrganizationWithUserInvitation(pgPool);
+
+const loginOrSignup = factoryLoginOrSignupUseCase(findUserByEmail, persistUser);
+
+const inviteUser = factoryInviteUserUseCase(
+    findUserByEmail,
+    findUserById,
+    findOranizationById,
+    persistOrganizationWithUserInvitation,
+);
 
 const latestLoggedInOrganizationQueryService =
     factoryLatestLoggedInOrganizationQueryService<null>(pgPool);
@@ -56,6 +76,7 @@ app.all(
                 sessionStorage,
                 latestLoggedInOrganizationQueryService,
                 homeQueryService,
+                inviteUser,
             };
         },
     }),

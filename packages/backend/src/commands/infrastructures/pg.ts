@@ -1,13 +1,20 @@
 import { Pool, PoolClient } from "pg";
 import { uuidv7 } from "uuidv7";
-import { User } from "../../commands/entities";
+import {
+    Organization,
+    User,
+    UserInvitationEvent,
+} from "../../commands/entities";
 import {
     DataConsistencyError,
-    FindUser,
+    Find,
     IoError,
-    PersistUser,
+    Persist,
 } from "../../commands/repositories";
 import {
+    Email,
+    OrganizationId,
+    UserId,
     parseDisplayName,
     parseEmail,
     parseOrganizationId,
@@ -18,12 +25,16 @@ import {
     insertAssign,
     insertBelong,
     insertOrgaization,
+    insertOrganizationInvitation,
     insertOrganizationProfile,
     insertUser,
     insertUserEmailRegistration,
     insertUserProfile,
     selectBelongingOrganizationByUserId,
+    selectLatestOraganizationProfileById,
     selectLatestUserProfileByEmail,
+    selectLatestUserProfileById,
+    selectOrganizationUsers,
 } from "../../pg_sql";
 
 const tx = async <T>(
@@ -72,7 +83,8 @@ const intoUserMayException = (from: {
         const organizationId = parseOrganizationId(organization.id);
         const organizationName = parseDisplayName(organization.name);
         const role = parseRole(organization.role);
-        const authorityManageOrganization = organization.authorityManageOrganization;
+        const authorityManageOrganization =
+            organization.authorityManageOrganization;
 
         if (organizationId.error || organizationName.error || role.error) {
             throw new DataConsistencyError(
@@ -96,8 +108,57 @@ const intoUserMayException = (from: {
     };
 };
 
-export const factoryFindUser =
-    <Context>(pool: Pool): FindUser<Context> =>
+export const factoryFindUserById =
+    <Context>(pool: Pool): Find<User, UserId, Context> =>
+    async (userId) => {
+        let conn;
+
+        try {
+            conn = await pool.connect();
+
+            const user = await selectLatestUserProfileById(conn, {
+                id: userId,
+            });
+
+            if (user === null) {
+                return { value: null };
+            }
+
+            const organizations = await selectBelongingOrganizationByUserId(
+                conn,
+                { userId: user.userId },
+            );
+
+            const value = intoUserMayException({
+                id: user.userId,
+                name: user.name,
+                email: user.email,
+                organizations: organizations.map((org) => ({
+                    id: org.organizationId,
+                    name: org.organizationName,
+                    role: org.roleName,
+                    authorityManageOrganization:
+                        org.authorityManageOrganization,
+                })),
+            });
+
+            return { value };
+        } catch (e) {
+            if (e instanceof DataConsistencyError) {
+                return { error: e };
+            }
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        } finally {
+            conn?.release();
+        }
+    };
+
+export const factoryFindUserByEmail =
+    <Context>(pool: Pool): Find<User, Email, Context> =>
     async (email) => {
         let conn;
 
@@ -123,7 +184,8 @@ export const factoryFindUser =
                     id: org.organizationId,
                     name: org.organizationName,
                     role: org.roleName,
-                    authorityManageOrganization: org.authorityManageOrganization,
+                    authorityManageOrganization:
+                        org.authorityManageOrganization,
                 })),
             });
 
@@ -143,7 +205,7 @@ export const factoryFindUser =
     };
 
 export const factoryPersitUser =
-    <Context>(pool: Pool): PersistUser<Context> =>
+    <Context>(pool: Pool): Persist<User, Context> =>
     async (user: User) => {
         try {
             await tx(pool, async (conn) => {
@@ -186,5 +248,124 @@ export const factoryPersitUser =
                     cause: e,
                 }),
             };
+        }
+    };
+
+export const factoryPersistOrganizationWithUserInvitation =
+    <Context>(
+        pool: Pool,
+    ): Persist<Organization & UserInvitationEvent, Context> =>
+    async (oranization: Organization & UserInvitationEvent) => {
+        try {
+            await tx(pool, async (conn) => {
+                const user = oranization.users.find(
+                    (user) => user.email === oranization.inviteeEmail,
+                );
+
+                if (user) {
+                    const belongId = uuidv7();
+                    await insertBelong(conn, {
+                        id: belongId,
+                        userId: user.id,
+                        organizationId: oranization.id,
+                    });
+                    await insertAssign(conn, {
+                        id: uuidv7(),
+                        roleName: user.role,
+                        belongId,
+                    });
+                }
+
+                await insertOrganizationInvitation(conn, {
+                    id: uuidv7(),
+                    organizationId: oranization.id,
+                    roleName: oranization.inviteeRole,
+                    inviteeUserEmail: oranization.inviteeEmail,
+                    inviterUserId: oranization.inviterUserId,
+                });
+            });
+            return { value: oranization.id };
+        } catch (e) {
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        }
+    };
+
+export const factoryFindOrganizationById =
+    <Context>(pool: Pool): Find<Organization, OrganizationId, Context> =>
+    async (organizationId) => {
+        let conn;
+
+        try {
+            conn = await pool.connect();
+
+            const [oranizationProfile, organizationUsers] = await Promise.all([
+                selectLatestOraganizationProfileById(conn, {
+                    id: organizationId,
+                }),
+                selectOrganizationUsers(conn, { organizationId }),
+            ]);
+
+            const oranizationName = oranizationProfile?.name
+                ? parseDisplayName(oranizationProfile.name)
+                : undefined;
+
+            if (
+                !oranizationName?.value ||
+                oranizationName?.error ||
+                organizationUsers.length === 0
+            ) {
+                throw new DataConsistencyError(
+                    `invlid data: organizationName: ${oranizationName}, users:${organizationUsers.length}`,
+                );
+            }
+
+            const users = [];
+            for (const row of organizationUsers) {
+                const id = parseUserId(row.userId);
+                const displayName = row.userName
+                    ? parseDisplayName(row.userName)
+                    : undefined;
+                const email = parseEmail(row.email);
+                const role = parseRole(row.roleName);
+                if (
+                    id.error ||
+                    displayName?.error ||
+                    email.error ||
+                    role.error
+                ) {
+                    throw new DataConsistencyError(
+                        `invalid data ${id}, ${displayName}, ${email}, ${role}`,
+                    );
+                }
+                users.push({
+                    id: id.value,
+                    displayName: displayName?.value,
+                    email: email.value,
+                    role: role.value,
+                });
+            }
+
+            return {
+                value: {
+                    id: organizationId,
+                    displayName: oranizationName.value,
+                    users,
+                },
+            };
+        } catch (e) {
+            if (e instanceof DataConsistencyError) {
+                return { error: e };
+            }
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        } finally {
+            conn?.release();
         }
     };

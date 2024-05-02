@@ -5,11 +5,55 @@ import {
     json,
     redirect,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { type Home } from "@backend/queries/services";
+import { parseInviteUserCommand } from "backend/src/commands/usecases";
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async (args: ActionFunctionArgs) => {
+    const form = await args.request.formData();
+    const actionType = form.get("actionType");
+    switch (actionType) {
+        case "logout":
+            return logoutAction(args);
+        case "invite":
+            return inviteAction(args, form);
+        default:
+    }
+};
+
+const logoutAction = async ({ request, context }: ActionFunctionArgs) => {
     await context.authenticator.logout(request, { redirectTo: "/login" });
+};
+
+const inviteAction = async (
+    { request, params, context }: ActionFunctionArgs,
+    form: FormData,
+) => {
+    const userId = await context.authenticator.isAuthenticated(request, {
+        failureRedirect: "/login",
+    });
+
+    const { organizationId } = params;
+    const ensuredOrganizationId = organizationId || "";
+    const role = form.get("role")?.toString() || "";
+    const inviteeEmail = form.get("inviteeEmail")?.toString() || "";
+
+    const command = parseInviteUserCommand(
+        ensuredOrganizationId,
+        role,
+        inviteeEmail,
+        userId,
+    );
+    if (command.error) {
+        return json({ error: command.error.message });
+    }
+
+    const invite = await context.inviteUser(command.value, null);
+    if (invite.error) {
+        return json({ error: invite.error.message });
+    }
+
+    return redirect(`/organization/${ensuredOrganizationId}`);
 };
 
 export const loader = async ({
@@ -42,6 +86,7 @@ export const loader = async ({
 };
 
 export default function OrganizationHome() {
+    const actionResult = useActionData<typeof action>();
     const { home, error } = useLoaderData<typeof loader>();
 
     const content = home ? (
@@ -54,6 +99,9 @@ export default function OrganizationHome() {
                 {home.selectedOrganization.id})
             </p>
             <p>role: {home.selectedOrganization.role}</p>
+            {home.selectedOrganization.users.map((user, i) => (
+                <p key={`xxx ${i}`}>{user.email}</p>
+            ))}
             <p>
                 authorityManageOrganization:{" "}
                 {home.selectedOrganization.authorityManageOrganization
@@ -83,7 +131,26 @@ export default function OrganizationHome() {
         >
             <Form method="post">
                 {content}
-                <button type="submit">LOGOUT</button>
+                <button type="submit" name="actionType" value="logout">
+                    LOGOUT
+                </button>
+                <hr />
+                <input
+                    name="inviteeEmail"
+                    type="email"
+                    placeholder="Enter invitee email adress"
+                />
+                <select name="role">
+                    <option value="admin">Admin</option>
+                    <option value="member">Member</option>
+                    <option value="guest">Guest</option>
+                </select>
+                <button type="submit" name="actionType" value="invite">
+                    INVITE
+                </button>
+                {actionResult?.error ? (
+                    <label>{actionResult.error.toString()}</label>
+                ) : null}
             </Form>
         </div>
     );
