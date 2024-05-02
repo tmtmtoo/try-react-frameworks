@@ -78,6 +78,19 @@ where
 order by organizations_profile.created_at desc
 limit 1;
 
+-- name: SelectInvitedUnknownUserByEmail :many
+select
+    organizations_invitation.organization_id,
+    organizations_invitation.invitee_user_email,
+    organizations_invitation.role_name
+from organizations_invitation
+left join organizations_invitation_cancel
+    on organizations_invitation.id = organizations_invitation_cancel.organizations_invitation_id
+where
+    organizations_invitation_cancel.id is null
+    and organizations_invitation.invitee_user_email = $1
+order by organizations_invitation.created_at asc;
+
 -- name: InsertUser :exec
 insert into users (id) values ($1);
 

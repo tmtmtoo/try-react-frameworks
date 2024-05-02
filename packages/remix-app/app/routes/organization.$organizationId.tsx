@@ -98,10 +98,20 @@ export default function OrganizationHome() {
                 selected organization: {home.selectedOrganization.name} (
                 {home.selectedOrganization.id})
             </p>
+
+            <div style={{ paddingLeft: "10px" }}>
+                {home.selectedOrganization.users.map((user, i) => (
+                    <p key={`users_${i}`}>{user.email}</p>
+                ))}
+                {home.selectedOrganization.invitingUnkownUsers.map(
+                    (user, i) => (
+                        <p
+                            key={`inviting_${i}`}
+                        >{`${user.email} (inviting)`}</p>
+                    ),
+                )}
+            </div>
             <p>role: {home.selectedOrganization.role}</p>
-            {home.selectedOrganization.users.map((user, i) => (
-                <p key={`xxx ${i}`}>{user.email}</p>
-            ))}
             <p>
                 authorityManageOrganization:{" "}
                 {home.selectedOrganization.authorityManageOrganization

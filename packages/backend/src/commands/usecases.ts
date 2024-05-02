@@ -2,9 +2,13 @@ import {
     AuthorizationError,
     DuplicationError,
     Organization,
+    UnknownUser,
     User,
+    UserCreationWithDefaultOrganizationEvent,
+    UserCreationWithInvitedOrganizationEvent,
     UserInvitationEvent,
     createUserWithDefaultOrganization,
+    createUserWithInvitedOrganization,
     inviteKnownUser,
     inviteUnkownUser,
 } from "../commands/entities";
@@ -80,20 +84,60 @@ export type LoginOrSignupUseCase<Context> = Component<
 
 export const factoryLoginOrSignupUseCase =
     <Context>(
-        findUser: Find<User, Email, Context>,
-        persistUser: Persist<User, Context>,
+        findUserByEmail: Find<User, Email, Context>,
+        findUnknownUserByEmail: Find<UnknownUser, Email, Context>,
+        persistUserWithDefaultOrganization: Persist<
+            User & UserCreationWithDefaultOrganizationEvent,
+            Context
+        >,
+        persistUserWithInvitedOrganization: Persist<
+            User & UserCreationWithInvitedOrganizationEvent,
+            Context
+        >,
     ): LoginOrSignupUseCase<Context> =>
     async (command: LoginOrSignupCommand, ctx: Context) => {
-        const findResult = await findUser(command.email, ctx);
+        const user = await findUserByEmail(command.email, ctx);
 
-        if (findResult.value === null) {
-            const userWithDefaultOrganization =
-                createUserWithDefaultOrganization(command.email);
-            const persistResult = await persistUser(
-                userWithDefaultOrganization,
+        if (user.value === null) {
+            const unknownUser = await findUnknownUserByEmail(
+                command.email,
                 ctx,
             );
+            if (unknownUser.error instanceof Error) {
+                return {
+                    error: new RepositoryError("failed to find unknown user", {
+                        cause: unknownUser.error,
+                    }),
+                };
+            }
+            if (unknownUser.error) {
+                return {
+                    error: new UnknownError("unknown error is occured", {
+                        cause: unknownUser.error,
+                    }),
+                };
+            }
 
+            let persistResult;
+
+            if (unknownUser.value === null) {
+                const userWithDefaultOrganization =
+                    createUserWithDefaultOrganization(command.email);
+                persistResult = await persistUserWithDefaultOrganization(
+                    userWithDefaultOrganization,
+                    ctx,
+                );
+            } else {
+                const userWithInvitedOrganizations =
+                    createUserWithInvitedOrganization(
+                        command.email,
+                        unknownUser.value.invitedOrganizations,
+                    );
+                persistResult = await persistUserWithInvitedOrganization(
+                    userWithInvitedOrganizations,
+                    ctx,
+                );
+            }
             if (persistResult.value) {
                 return { value: persistResult.value };
             }
@@ -111,19 +155,19 @@ export const factoryLoginOrSignupUseCase =
             };
         }
 
-        if (findResult.value) {
-            return { value: findResult.value.id };
+        if (user.value) {
+            return { value: user.value.id };
         }
-        if (findResult.error instanceof Error) {
+        if (user.error instanceof Error) {
             return {
                 error: new RepositoryError("failed to find user", {
-                    cause: findResult.error,
+                    cause: user.error,
                 }),
             };
         }
         return {
             error: new UnknownError("Unknown error has occured", {
-                cause: findResult.error,
+                cause: user.error,
             }),
         };
     };

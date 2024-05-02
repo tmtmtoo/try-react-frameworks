@@ -5,9 +5,6 @@ import {
     OrganizationId,
     Role,
     UserId,
-    parseDisplayName,
-    parseOrganizationId,
-    parseUserId,
 } from "../commands/values";
 import { Result } from "../types";
 
@@ -15,41 +12,62 @@ export type User = {
     id: UserId;
     email: Email;
     displayName?: DisplayName;
-    organizations: {
+    belongingOrganizations: {
         id: OrganizationId;
-        displayName: DisplayName;
         role: Role;
         authorityManageOrganization?: boolean;
     }[];
 };
 
+export type UserCreationWithDefaultOrganizationEvent = {
+    createdOrganizationId: OrganizationId;
+    createdOrganizationName: DisplayName;
+};
+
 export const createUserWithDefaultOrganization = (
+    email: Email
+): User & UserCreationWithDefaultOrganizationEvent => {
+    const organizationId = uuidv7() as OrganizationId;
+    const organizationName = "My first organization" as DisplayName
+    return {
+        id: uuidv7() as UserId,
+        email,
+        belongingOrganizations: [
+            {
+                id: organizationId,
+                role: "admin" as Role,
+            },
+        ],
+        createdOrganizationId: organizationId,
+        createdOrganizationName: organizationName
+    };
+};
+
+export type UserCreationWithInvitedOrganizationEvent = {
+    invitedOrganizationIds: OrganizationId[]
+}
+
+export const createUserWithInvitedOrganization = (
     email: Email,
-    userId?: UserId,
-    organizationId?: OrganizationId,
-): User => ({
-    id: userId ? userId : (parseUserId(uuidv7()).value as UserId),
+    invitedOrganizations: {
+        id: OrganizationId,
+        role: Role
+    }[]
+): User & UserCreationWithInvitedOrganizationEvent => ({
+    id: uuidv7() as UserId,
     email,
-    organizations: [
-        {
-            id: organizationId
-                ? organizationId
-                : (parseOrganizationId(uuidv7()).value as OrganizationId),
-            displayName: parseDisplayName("My First Organization")
-                .value as DisplayName,
-            role: "admin",
-        },
-    ],
-});
+    belongingOrganizations: invitedOrganizations,
+    invitedOrganizationIds: invitedOrganizations.map(organization => organization.id)
+})
 
 export const canInviteToOrganization = (
     user: User,
     organizationId: OrganizationId,
 ) =>
-    user.organizations.find(
+    user.belongingOrganizations.find(
         (organization) => organization.id === organizationId,
     )?.authorityManageOrganization ?? false;
-
+    
 export type UserInvitationEvent = {
     inviteeRole: Role;
     inviteeEmail: Email;
@@ -73,6 +91,10 @@ export type Organization = {
         displayName?: DisplayName;
         role: Role;
     }[];
+    invitingUnknownUsers: {
+        email: Email;
+        role: Role;
+    }[];
 };
 
 export class AuthorizationError extends Error {
@@ -94,7 +116,10 @@ export const inviteUnkownUser = (
     role: Role,
     inviteeEmail: Email,
     inviter: User,
-): Result<Organization & UserInvitationEvent, AuthorizationError | DuplicationError> => {
+): Result<
+    Organization & UserInvitationEvent,
+    AuthorizationError | DuplicationError
+> => {
     if (!canInviteToOrganization(inviter, organization.id)) {
         return {
             error: new AuthorizationError(
@@ -103,9 +128,10 @@ export const inviteUnkownUser = (
         };
     }
 
-    const isExists = !!organization.users.find(
-        (user) => user.email === inviteeEmail,
-    );
+    const isExists =
+        !!organization.invitingUnknownUsers.find(
+            (user) => user.email === inviteeEmail,
+        ) || !!organization.users.find((user) => user.email === inviteeEmail);
 
     if (isExists) {
         return {
@@ -130,7 +156,10 @@ export const inviteKnownUser = (
     role: Role,
     invitee: User,
     inviter: User,
-): Result<Organization & UserInvitationEvent, AuthorizationError | DuplicationError> => {
+): Result<
+    Organization & UserInvitationEvent,
+    AuthorizationError | DuplicationError
+> => {
     if (!canInviteToOrganization(inviter, organization.id)) {
         return {
             error: new AuthorizationError(
@@ -139,13 +168,17 @@ export const inviteKnownUser = (
         };
     }
 
-    const isExists = !!organization.users.find(
-        (user) => user.id === invitee.id,
-    );
+    const isExists =
+        !!organization.users.find((user) => user.id === invitee.id) ||
+        !!organization.invitingUnknownUsers.find(
+            (user) => user.email === invitee.email,
+        );
 
     if (isExists) {
         return {
-            error: new DuplicationError(`${invitee.id} is existing on ${organization.id}`),
+            error: new DuplicationError(
+                `${invitee.id} is existing on ${organization.id}`,
+            ),
         };
     }
 
@@ -167,3 +200,11 @@ export const inviteKnownUser = (
 
     return { value };
 };
+
+export type UnknownUser = {
+    email: Email,
+    invitedOrganizations: {
+        id: OrganizationId,
+        role: Role
+    }[]
+}

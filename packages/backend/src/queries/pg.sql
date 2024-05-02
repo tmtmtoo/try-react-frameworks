@@ -112,3 +112,33 @@ where
     and belong.user_id = $1
 order by belong.created_at asc
 limit 1;
+
+-- name: SelectInvitingUnknownUsers :many
+with latest_user_email as (
+    select
+        user_id,
+        email
+    from (
+        select
+            user_id,
+            email,
+            row_number() over (partition by user_id order by created_at desc) as rn
+        from users_email_registration
+    ) as t
+    where rn = 1
+)
+
+select
+    organizations_invitation.organization_id,
+    organizations_invitation.role_name,
+    organizations_invitation.invitee_user_email
+from organizations_invitation
+left join
+    organizations_invitation_cancel
+    on organizations_invitation.id = organizations_invitation_cancel.organizations_invitation_id
+left join latest_user_email on organizations_invitation.invitee_user_email = latest_user_email.email
+where
+    organizations_invitation_cancel.id is null
+    and latest_user_email.email is null
+    and organizations_invitation.organization_id = $1
+order by organizations_invitation.created_at asc;

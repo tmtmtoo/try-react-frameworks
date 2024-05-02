@@ -2,7 +2,10 @@ import { Pool, PoolClient } from "pg";
 import { uuidv7 } from "uuidv7";
 import {
     Organization,
+    UnknownUser,
     User,
+    UserCreationWithDefaultOrganizationEvent,
+    UserCreationWithInvitedOrganizationEvent,
     UserInvitationEvent,
 } from "../../commands/entities";
 import {
@@ -31,6 +34,8 @@ import {
     insertUserEmailRegistration,
     insertUserProfile,
     selectBelongingOrganizationByUserId,
+    selectInvitedUnknownUserByEmail,
+    selectInvitingUnknownUsers,
     selectLatestOraganizationProfileById,
     selectLatestUserProfileByEmail,
     selectLatestUserProfileById,
@@ -62,7 +67,6 @@ const intoUserMayException = (from: {
     email: string;
     organizations: {
         id: string;
-        name: string;
         role: string;
         authorityManageOrganization: boolean;
     }[];
@@ -81,20 +85,18 @@ const intoUserMayException = (from: {
 
     for (const organization of from.organizations) {
         const organizationId = parseOrganizationId(organization.id);
-        const organizationName = parseDisplayName(organization.name);
         const role = parseRole(organization.role);
         const authorityManageOrganization =
             organization.authorityManageOrganization;
 
-        if (organizationId.error || organizationName.error || role.error) {
+        if (organizationId.error || role.error) {
             throw new DataConsistencyError(
-                `invalid belongings: organization_id: ${organization.id}, organization_name: ${organization.name}, role: ${organization.role}, authority_manage_organization: ${organization.authorityManageOrganization}`,
+                `invalid belongings: organization_id: ${organization.id}, role: ${organization.role}, authority_manage_organization: ${organization.authorityManageOrganization}`,
             );
         }
 
         organizations.push({
             id: organizationId.value,
-            displayName: organizationName.value,
             role: role.value,
             authorityManageOrganization,
         });
@@ -104,7 +106,7 @@ const intoUserMayException = (from: {
         id: userId.value,
         displayName: userName?.value,
         email: userEmail.value,
-        organizations,
+        belongingOrganizations: organizations,
     };
 };
 
@@ -135,7 +137,6 @@ export const factoryFindUserById =
                 email: user.email,
                 organizations: organizations.map((org) => ({
                     id: org.organizationId,
-                    name: org.organizationName,
                     role: org.roleName,
                     authorityManageOrganization:
                         org.authorityManageOrganization,
@@ -182,7 +183,6 @@ export const factoryFindUserByEmail =
                 email: user.email,
                 organizations: organizations.map((org) => ({
                     id: org.organizationId,
-                    name: org.organizationName,
                     role: org.roleName,
                     authorityManageOrganization:
                         org.authorityManageOrganization,
@@ -204,9 +204,11 @@ export const factoryFindUserByEmail =
         }
     };
 
-export const factoryPersitUser =
-    <Context>(pool: Pool): Persist<User, Context> =>
-    async (user: User) => {
+export const factoryPersistUserWithDefaultOrganization =
+    <Context>(
+        pool: Pool,
+    ): Persist<User & UserCreationWithDefaultOrganizationEvent, Context> =>
+    async (user) => {
         try {
             await tx(pool, async (conn) => {
                 await insertUser(conn, { id: user.id });
@@ -221,13 +223,65 @@ export const factoryPersitUser =
                     name: user.displayName ? user.displayName : null,
                 });
 
-                for (const organization of user.organizations) {
-                    await insertOrgaization(conn, { id: organization.id });
-                    await insertOrganizationProfile(conn, {
-                        id: uuidv7(),
-                        organizationId: organization.id,
-                        name: organization.displayName,
-                    });
+                const organization = user.belongingOrganizations.find(
+                    (organization) =>
+                        organization.id === user.createdOrganizationId,
+                );
+
+                if (!organization) {
+                    throw new DataConsistencyError(
+                        `createdOrganization not found ${user.createdOrganizationId}`,
+                    );
+                }
+
+                await insertOrgaization(conn, { id: organization.id });
+                await insertOrganizationProfile(conn, {
+                    id: uuidv7(),
+                    organizationId: organization.id,
+                    name: user.createdOrganizationName,
+                });
+                const belongId = uuidv7();
+                await insertBelong(conn, {
+                    id: belongId,
+                    userId: user.id,
+                    organizationId: organization.id,
+                });
+                await insertAssign(conn, {
+                    id: uuidv7(),
+                    roleName: organization.role,
+                    belongId,
+                });
+            });
+            return { value: user.id };
+        } catch (e) {
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        }
+    };
+
+export const factoryPersistUserWithInvitedOrganization =
+    <Context>(
+        pool: Pool,
+    ): Persist<User & UserCreationWithInvitedOrganizationEvent, Context> =>
+    async (user) => {
+        try {
+            await tx(pool, async (conn) => {
+                await insertUser(conn, { id: user.id });
+                await insertUserEmailRegistration(conn, {
+                    id: uuidv7(),
+                    userId: user.id,
+                    email: user.email,
+                });
+                await insertUserProfile(conn, {
+                    id: uuidv7(),
+                    userId: user.id,
+                    name: user.displayName ? user.displayName : null,
+                });
+
+                for (const organization of user.belongingOrganizations) {
                     const belongId = uuidv7();
                     await insertBelong(conn, {
                         id: belongId,
@@ -302,11 +356,16 @@ export const factoryFindOrganizationById =
         try {
             conn = await pool.connect();
 
-            const [oranizationProfile, organizationUsers] = await Promise.all([
+            const [
+                oranizationProfile,
+                organizationUsers,
+                organizationInviting,
+            ] = await Promise.all([
                 selectLatestOraganizationProfileById(conn, {
                     id: organizationId,
                 }),
                 selectOrganizationUsers(conn, { organizationId }),
+                selectInvitingUnknownUsers(conn, { organizationId }),
             ]);
 
             const oranizationName = oranizationProfile?.name
@@ -349,11 +408,73 @@ export const factoryFindOrganizationById =
                 });
             }
 
+            const invitingUnknownUsers = [];
+
+            for (const user of organizationInviting) {
+                const email = parseEmail(user.inviteeUserEmail);
+                const role = parseRole(user.roleName);
+                if (email.error || role.error) {
+                    throw new DataConsistencyError(
+                        `invalid data: ${email} ${role}`,
+                    );
+                }
+                invitingUnknownUsers.push({
+                    email: email.value,
+                    role: role.value,
+                });
+            }
+
             return {
                 value: {
                     id: organizationId,
                     displayName: oranizationName.value,
                     users,
+                    invitingUnknownUsers,
+                },
+            };
+        } catch (e) {
+            if (e instanceof DataConsistencyError) {
+                return { error: e };
+            }
+            return {
+                error: new IoError("connection or transaction error", {
+                    cause: e,
+                }),
+            };
+        } finally {
+            conn?.release();
+        }
+    };
+
+export const factoryFindUnknownUserByEmail =
+    <Context>(pool: Pool): Find<UnknownUser, Email, Context> =>
+    async (email) => {
+        let conn;
+
+        try {
+            conn = await pool.connect();
+
+            const unknownUser = await selectInvitedUnknownUserByEmail(conn, {
+                inviteeUserEmail: email,
+            });
+
+            const invitedOrganizations = [];
+
+            for (const user of unknownUser) {
+                const id = parseOrganizationId(user.organizationId);
+                const role = parseRole(user.roleName);
+                if (id.error || role.error) {
+                    throw new DataConsistencyError(
+                        `invalid resources: ${id}, ${role}`,
+                    );
+                }
+                invitedOrganizations.push({ id: id.value, role: role.value });
+            }
+
+            return {
+                value: {
+                    email,
+                    invitedOrganizations,
                 },
             };
         } catch (e) {

@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import {
     selectBelongingOrganizations,
+    selectInvitingUnknownUsers,
     selectOrganizationUsers,
     selectSwitchedOrganization,
     selectUser,
@@ -29,6 +30,10 @@ export type Home = {
             id: string;
             email: string;
             name?: string;
+            role: string;
+        }[];
+        invitingUnkownUsers: {
+            email: string;
             role: string;
         }[];
     };
@@ -69,6 +74,8 @@ export const factoryHomeQueryService =
                 organizationId,
             });
 
+            const invitingUnkownUsers = await selectInvitingUnknownUsers(client, { organizationId });
+
             const home: Home = {
                 id: user.id,
                 email: user.email,
@@ -88,6 +95,10 @@ export const factoryHomeQueryService =
                         email: user.email,
                         role: user.roleName,
                     })),
+                    invitingUnkownUsers: invitingUnkownUsers.map(user => ({
+                        email: user.inviteeUserEmail,
+                        role: user.roleName,
+                    }))
                 },
             };
 

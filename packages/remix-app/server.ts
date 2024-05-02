@@ -1,9 +1,11 @@
 import {
     factoryFindOrganizationById,
+    factoryFindUnknownUserByEmail,
     factoryFindUserByEmail,
     factoryFindUserById,
     factoryPersistOrganizationWithUserInvitation,
-    factoryPersitUser,
+    factoryPersistUserWithDefaultOrganization,
+    factoryPersistUserWithInvitedOrganization,
 } from "@backend/commands/infrastructures/pg";
 import {
     factoryInviteUserUseCase,
@@ -34,12 +36,23 @@ const findUserById = factoryFindUserById(pgPool);
 
 const findOranizationById = factoryFindOrganizationById(pgPool);
 
-const persistUser = factoryPersitUser(pgPool);
+const findUnknownUserByEmail = factoryFindUnknownUserByEmail(pgPool);
+
+const persistUserWithDefaultOrganization =
+    factoryPersistUserWithDefaultOrganization(pgPool);
+
+const persistUserWithInvitedOrganization =
+    factoryPersistUserWithInvitedOrganization(pgPool);
 
 const persistOrganizationWithUserInvitation =
     factoryPersistOrganizationWithUserInvitation(pgPool);
 
-const loginOrSignup = factoryLoginOrSignupUseCase(findUserByEmail, persistUser);
+const loginOrSignup = factoryLoginOrSignupUseCase(
+    findUserByEmail,
+    findUnknownUserByEmail,
+    persistUserWithDefaultOrganization,
+    persistUserWithInvitedOrganization,
+);
 
 const inviteUser = factoryInviteUserUseCase(
     findUserByEmail,

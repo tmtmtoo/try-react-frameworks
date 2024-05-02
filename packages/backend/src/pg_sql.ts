@@ -190,6 +190,44 @@ export async function selectLatestOraganizationProfileById(client: Client, args:
     };
 }
 
+export const selectInvitedUnknownUserByEmailQuery = `-- name: SelectInvitedUnknownUserByEmail :many
+select
+    organizations_invitation.organization_id,
+    organizations_invitation.invitee_user_email,
+    organizations_invitation.role_name
+from organizations_invitation
+left join organizations_invitation_cancel
+    on organizations_invitation.id = organizations_invitation_cancel.organizations_invitation_id
+where
+    organizations_invitation_cancel.id is null
+    and organizations_invitation.invitee_user_email = $1
+order by organizations_invitation.created_at asc`;
+
+export interface SelectInvitedUnknownUserByEmailArgs {
+    inviteeUserEmail: string;
+}
+
+export interface SelectInvitedUnknownUserByEmailRow {
+    organizationId: string;
+    inviteeUserEmail: string;
+    roleName: string;
+}
+
+export async function selectInvitedUnknownUserByEmail(client: Client, args: SelectInvitedUnknownUserByEmailArgs): Promise<SelectInvitedUnknownUserByEmailRow[]> {
+    const result = await client.query({
+        text: selectInvitedUnknownUserByEmailQuery,
+        values: [args.inviteeUserEmail],
+        rowMode: "array"
+    });
+    return result.rows.map(row => {
+        return {
+            organizationId: row[0],
+            inviteeUserEmail: row[1],
+            roleName: row[2]
+        };
+    });
+}
+
 export const insertUserQuery = `-- name: InsertUser :exec
 insert into users (id) values ($1)`;
 
@@ -545,5 +583,60 @@ export async function selectSwitchedOrganization(client: Client, args: SelectSwi
         firstBelongedOrganizationId: row[0],
         lastSwitchedOrganizationId: row[1]
     };
+}
+
+export const selectInvitingUnknownUsersQuery = `-- name: SelectInvitingUnknownUsers :many
+with latest_user_email as (
+    select
+        user_id,
+        email
+    from (
+        select
+            user_id,
+            email,
+            row_number() over (partition by user_id order by created_at desc) as rn
+        from users_email_registration
+    ) as t
+    where rn = 1
+)
+
+select
+    organizations_invitation.organization_id,
+    organizations_invitation.role_name,
+    organizations_invitation.invitee_user_email
+from organizations_invitation
+left join
+    organizations_invitation_cancel
+    on organizations_invitation.id = organizations_invitation_cancel.organizations_invitation_id
+left join latest_user_email on organizations_invitation.invitee_user_email = latest_user_email.email
+where
+    organizations_invitation_cancel.id is null
+    and latest_user_email.email is null
+    and organizations_invitation.organization_id = $1
+order by organizations_invitation.created_at asc`;
+
+export interface SelectInvitingUnknownUsersArgs {
+    organizationId: string;
+}
+
+export interface SelectInvitingUnknownUsersRow {
+    organizationId: string;
+    roleName: string;
+    inviteeUserEmail: string;
+}
+
+export async function selectInvitingUnknownUsers(client: Client, args: SelectInvitingUnknownUsersArgs): Promise<SelectInvitingUnknownUsersRow[]> {
+    const result = await client.query({
+        text: selectInvitingUnknownUsersQuery,
+        values: [args.organizationId],
+        rowMode: "array"
+    });
+    return result.rows.map(row => {
+        return {
+            organizationId: row[0],
+            roleName: row[1],
+            inviteeUserEmail: row[2]
+        };
+    });
 }
 
