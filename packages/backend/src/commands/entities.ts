@@ -25,10 +25,10 @@ export type UserCreationWithDefaultOrganizationEvent = {
 };
 
 export const createUserWithDefaultOrganization = (
-    email: Email
+    email: Email,
 ): User & UserCreationWithDefaultOrganizationEvent => {
     const organizationId = uuidv7() as OrganizationId;
-    const organizationName = "My first organization" as DisplayName
+    const organizationName = "My first organization" as DisplayName;
     return {
         id: uuidv7() as UserId,
         email,
@@ -39,26 +39,28 @@ export const createUserWithDefaultOrganization = (
             },
         ],
         createdOrganizationId: organizationId,
-        createdOrganizationName: organizationName
+        createdOrganizationName: organizationName,
     };
 };
 
 export type UserCreationWithInvitedOrganizationEvent = {
-    invitedOrganizationIds: OrganizationId[]
-}
+    invitedOrganizationIds: OrganizationId[];
+};
 
 export const createUserWithInvitedOrganization = (
     email: Email,
     invitedOrganizations: {
-        id: OrganizationId,
-        role: Role
-    }[]
+        id: OrganizationId;
+        role: Role;
+    }[],
 ): User & UserCreationWithInvitedOrganizationEvent => ({
     id: uuidv7() as UserId,
     email,
     belongingOrganizations: invitedOrganizations,
-    invitedOrganizationIds: invitedOrganizations.map(organization => organization.id)
-})
+    invitedOrganizationIds: invitedOrganizations.map(
+        (organization) => organization.id,
+    ),
+});
 
 export const canInviteToOrganization = (
     user: User,
@@ -67,7 +69,7 @@ export const canInviteToOrganization = (
     user.belongingOrganizations.find(
         (organization) => organization.id === organizationId,
     )?.authorityManageOrganization ?? false;
-    
+
 export type UserInvitationEvent = {
     inviteeRole: Role;
     inviteeEmail: Email;
@@ -202,9 +204,12 @@ export const inviteKnownUser = (
 };
 
 export type UnknownUser = {
-    email: Email,
+    email: Email;
     invitedOrganizations: {
-        id: OrganizationId,
-        role: Role
-    }[]
-}
+        id: OrganizationId;
+        role: Role;
+    }[];
+};
+
+export const isInvitedFromAnyOrganizations = (unknownUser: UnknownUser) =>
+    unknownUser.invitedOrganizations.length !== 0;

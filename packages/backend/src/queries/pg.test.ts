@@ -274,9 +274,8 @@ describe("when postgresql given fixtures", () => {
                             role: "admin",
                         },
                     ],
-                    
+                    invitingUnkownUsers: [],
                 },
-                invitingUnkownUsers: []
             },
         });
     });

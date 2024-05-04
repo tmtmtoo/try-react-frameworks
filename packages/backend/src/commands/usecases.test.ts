@@ -57,7 +57,9 @@ describe("when execute loginOrSignupUseCase", () => {
         };
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockResolvedValue({ value: user }),
-            vi.fn(),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
@@ -68,10 +70,9 @@ describe("when execute loginOrSignupUseCase", () => {
             id: "018e8e8e-e5c2-7b45-b3eb-6570867230e5" as UserId,
             displayName: "aaa" as DisplayName,
             email: "aaa@example.com" as Email,
-            organizations: [
+            belongingOrganizations: [
                 {
                     id: "018e8e8f-b0a2-7d42-b023-d3e38bd5529f" as OrganizationId,
-                    displayName: "bbb" as DisplayName,
                     role: "admin" as Role,
                     authorityManageOrganization: true,
                 },
@@ -79,16 +80,25 @@ describe("when execute loginOrSignupUseCase", () => {
         };
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockResolvedValue({ value: null }),
-            vi.fn().mockResolvedValue({ value: user }),
+            vi.fn().mockResolvedValue({
+                value: {
+                    email: "aaa@example.com" as Email,
+                    invitedOrganizations: [],
+                },
+            }),
+            vi.fn().mockResolvedValue({ value: user.id }),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
-        expect(result.value).toStrictEqual(user);
+        expect(result.value).toStrictEqual(user.id);
     });
     it("return RepositoryError if findUser failed", async () => {
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockResolvedValue({ error: new IoError() }),
-            vi.fn(),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
@@ -97,7 +107,9 @@ describe("when execute loginOrSignupUseCase", () => {
     it("return RepositoryError if persistUser failed", async () => {
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockResolvedValue({ value: null }),
+            vi.fn().mockResolvedValue({ value: null }),
             vi.fn().mockResolvedValue({ error: new DataConsistencyError() }),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
@@ -106,7 +118,9 @@ describe("when execute loginOrSignupUseCase", () => {
     it("return UnknownError if unexpected error occured", async () => {
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockResolvedValue({ error: "shit" }),
-            vi.fn(),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         const result = await usecase(command, null);
@@ -115,7 +129,9 @@ describe("when execute loginOrSignupUseCase", () => {
     it("throw exception if repository throws exception", async () => {
         const usecase = factoryLoginOrSignupUseCase(
             vi.fn().mockRejectedValue(new Error()),
-            vi.fn(),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
+            vi.fn().mockRejectedValue("unreachable"),
         );
         const command = { email: "aaa@example.com" } as LoginOrSignupCommand;
         expect(() => usecase(command, null)).rejects.toThrow(new Error());

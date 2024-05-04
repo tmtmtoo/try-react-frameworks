@@ -11,6 +11,7 @@ import {
     createUserWithInvitedOrganization,
     inviteKnownUser,
     inviteUnkownUser,
+    isInvitedFromAnyOrganizations,
 } from "../commands/entities";
 import { Find, IoError, Persist } from "../commands/repositories";
 import {
@@ -120,7 +121,10 @@ export const factoryLoginOrSignupUseCase =
 
             let persistResult;
 
-            if (unknownUser.value === null) {
+            if (
+                unknownUser.value === null ||
+                !isInvitedFromAnyOrganizations(unknownUser.value)
+            ) {
                 const userWithDefaultOrganization =
                     createUserWithDefaultOrganization(command.email);
                 persistResult = await persistUserWithDefaultOrganization(
